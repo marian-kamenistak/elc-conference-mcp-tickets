@@ -104,18 +104,62 @@ mcp-publisher publish
 
 **Priority:** High — 6,000+ servers, large community.
 
-**Steps:**
+**How it works:** Smithery acts as a gateway — your server stays on your infrastructure (Cloudflare Workers). Smithery proxies requests and handles discovery/listing.
+
+#### Option A: Web Form (recommended)
+
+1. Go to https://smithery.ai/new
+2. Sign in (GitHub OAuth)
+3. Enter the server URL: `https://mcp.elc-conference.io/mcp`
+4. Smithery will automatically scan the endpoint and extract tool metadata
+5. Review and confirm the listing
+
+**If scanning fails (403):** Our server is public so this shouldn't happen. If it does, either:
+- Ensure the server returns 401 (not 403) for unauthenticated requests
+- Host a static server card at `https://mcp.elc-conference.io/.well-known/mcp/server-card.json`
+
+#### Option B: CLI
 
 ```bash
-# Option A: CLI
-npx -y @smithery/cli publish https://mcp.elc-conference.io/mcp \
-  --name "elc-conference-mcp-tickets" \
-  --description "Browse and buy ELC Conference 2026 tickets via AI"
+# 1. Get API key from https://smithery.ai/account/api-keys
+export SMITHERY_API_KEY=your_key
 
-# Option B: Web
-# Go to https://smithery.ai and click "Submit Server"
-# Provide the GitHub repo URL: https://github.com/marian-kamenistak/elc-conference-mcp-tickets
+# 2. Publish
+smithery mcp publish "https://mcp.elc-conference.io/mcp" \
+  -n @marian-kamenistak/elc-conference-mcp-tickets
 ```
+
+#### Option C: Community Servers (GitHub PR)
+
+Submit a PR to https://github.com/smithery-ai/community-servers-1 to add the server to the community registry.
+
+#### smithery.yaml (optional, recommended)
+
+Add `smithery.yaml` to the repo root for Smithery to understand the build/run configuration:
+
+```yaml
+runtime: "typescript"
+startCommand:
+  type: "http"
+  configSchema:
+    type: "object"
+    properties: {}
+  commandFunction: |
+    (config) => ({
+      command: "node",
+      args: ["dist/index.js"],
+      env: {}
+    })
+```
+
+Since our server is already deployed on Cloudflare Workers, Smithery primarily uses the remote URL. The `smithery.yaml` helps if users want to run the stdio version locally via Smithery.
+
+#### Verification
+
+After submission:
+1. Search for "elc-conference" on https://smithery.ai
+2. Confirm tools are listed (get-conference-info, get-available-tickets, buy-ticket)
+3. Test the server card is accessible
 
 ---
 
