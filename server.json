@@ -1,0 +1,27 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.marian-kamenistak/elc-conference-mcp-tickets",
+  "description": "Browse and buy ELC Conference 2026 engineering leadership tickets in Prague via AI.",
+  "repository": {
+    "url": "https://github.com/marian-kamenistak/elc-conference-mcp-tickets",
+    "source": "github"
+  },
+  "version": "0.1.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "elc-conference-mcp-tickets",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": []
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.elc-conference.io/mcp"
+    }
+  ]
+}

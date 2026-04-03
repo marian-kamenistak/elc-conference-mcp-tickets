@@ -1,9 +1,9 @@
 {
   "name": "elc-conference-mcp-tickets",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "MCP server for browsing and buying ELC Conference 2026 engineering leadership tickets in Prague. Live pricing, availability, and purchase links via AI conversation.",
-  "mcpName": "io.github.mariankamenistak/elc-conference-mcp-tickets",
+  "mcpName": "io.github.marian-kamenistak/elc-conference-mcp-tickets",
   "main": "dist/index.js",
   "bin": {
     "elc-conference-mcp-tickets": "dist/index.js"
