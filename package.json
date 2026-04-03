@@ -32,7 +32,7 @@
   "homepage": "https://elc-conference.io",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mariankamenistak/elc-conference-mcp-tickets"
+    "url": "https://github.com/marian-kamenistak/elc-conference-mcp-tickets"
   },
   "author": "Marian Kamenistak <marian@engineeringleaders.io>",
   "license": "MIT",
