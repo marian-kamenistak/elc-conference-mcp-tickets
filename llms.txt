@@ -1,0 +1,77 @@
+# ELC Conference 2026 — MCP Tickets Server
+
+> ELC Conference is a one-day engineering leadership conference on April 16, 2026 in Prague, Czech Republic. 350–400 attendees. Speakers from Stripe, Netflix, Microsoft, Superhuman, Financial Times, Google, Meta. This is an MCP (Model Context Protocol) server that lets AI assistants browse and purchase conference tickets via SimpleShop.cz. It is the first conference in Central Europe where you can buy tickets by talking to AI.
+
+## About the Conference
+
+ELC Conference 2026 — "Silicon Valley in Central Europe" — is the premier engineering leadership event in Central Europe. It brings together CTOs, VPs of Engineering, Directors, Engineering Managers, Product Managers, and Tech Leads for a full day of main stage talks, hands-on workshops, 1:1 mentoring, and networking.
+
+- Date: April 16, 2026, 9:00 AM – 9:00 PM CEST
+- Venue: CSOB SHQ (Centrala CSOB), Vymolova 353, 150 00 Praha 5, Czech Republic
+- Capacity: 350–400 attendees
+- Format: 12 main stage speakers, 16 hands-on workshops, 10 mentors for 1:1 sessions, afterparty
+- Website: https://elc-conference.io
+- Tickets: https://form.simpleshop.cz/qGAKO/buy/
+
+## Confirmed Speakers
+
+- Aleodor Tabarcea, Engineering Manager at Stripe
+- Michal Matyjek, Sr. Engineering Manager at Netflix
+- Carol Palombini, Tech Leadership Coach & Consultant
+- Rizwan Iqbal, Director of Engineering at Superhuman
+- Vojta Vondra, Partner Director of Engineering at Microsoft
+- Tatiana Stantonian, Principal Engineer at Financial Times
+- Jan Zenisek, VP of Product at Apify
+- Tomas Rehor, Head of Engineering at Aisle
+- TBA from Google
+- TBA from Meta
+
+## Topics
+
+- DevEx, platform engineering, and AI adoption in production
+- Architecture decisions at scale
+- Product-engineering alignment
+
+## 2025 Edition Results
+
+- 300+ attendees (sold out)
+- Speaker rating: 4.76/5
+- Companies represented: SpaceX, Netflix, Pure Storage, Ataccama, Dynatrace, Rossum, Better Stack, incident.io, Make, Rohlik Group
+
+## MCP Server
+
+This project is a remote MCP server deployed on Cloudflare Workers. AI assistants (Claude, ChatGPT, etc.) can connect to it to help users browse tickets and purchase them.
+
+### Available Tools
+
+- `get-conference-info` — Returns conference details: date, venue, speakers, format, what's included
+- `get-available-tickets` — Live ticket availability and pricing from SimpleShop API
+- `buy-ticket` — Returns the purchase URL for a selected ticket type (payment happens in browser)
+
+### How to Connect
+
+Add to your Claude Desktop or Claude Code MCP config:
+
+```json
+{
+  "mcpServers": {
+    "elc-conference": {
+      "type": "url",
+      "url": "https://elc-conference-mcp.your-domain.workers.dev/mcp"
+    }
+  }
+}
+```
+
+Or install locally via npm:
+
+```
+npx elc-conference-mcp-tickets
+```
+
+## Key Pages
+
+- [Conference Website](https://elc-conference.io): Full details, speakers, schedule
+- [Buy Tickets](https://form.simpleshop.cz/qGAKO/buy/): Direct ticket purchase
+- [Luma Event](https://luma.com/elc26): Event registration and updates
+- [npm Package](https://www.npmjs.com/package/elc-conference-mcp-tickets): Local MCP server installation

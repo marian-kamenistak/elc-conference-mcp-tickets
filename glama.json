@@ -1,0 +1,9 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "maintainers": ["mariankamenistak"],
+  "name": "ELC Conference MCP Tickets",
+  "description": "MCP server for browsing and buying ELC Conference 2026 engineering leadership tickets. Live pricing from SimpleShop API. First conference in Central Europe with AI-powered ticket purchasing.",
+  "repository": "https://github.com/mariankamenistak/elc-conference-mcp-tickets",
+  "homepage": "https://elc-conference.io",
+  "tags": ["conference", "tickets", "engineering-leadership", "mcp", "elc", "prague"]
+}

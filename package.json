@@ -1,0 +1,57 @@
+{
+  "name": "elc-conference-mcp-tickets",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "MCP server for browsing and buying ELC Conference 2026 engineering leadership tickets in Prague. Live pricing, availability, and purchase links via AI conversation.",
+  "mcpName": "io.github.mariankamenistak/elc-conference-mcp-tickets",
+  "main": "dist/index.js",
+  "bin": {
+    "elc-conference-mcp-tickets": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc && node -e \"const fs=require('fs');const f='dist/index.js';fs.writeFileSync(f,'#!/usr/bin/env node\\n'+fs.readFileSync(f,'utf8'))\" && chmod 755 dist/index.js",
+    "dev": "wrangler dev",
+    "start": "node dist/index.js",
+    "deploy": "wrangler deploy",
+    "test": "node --test dist/tests/"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude",
+    "ai",
+    "conference",
+    "tickets",
+    "elc",
+    "engineering-leadership",
+    "prague",
+    "simpleshop",
+    "cloudflare-workers"
+  ],
+  "homepage": "https://elc-conference.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mariankamenistak/elc-conference-mcp-tickets"
+  },
+  "author": "Marian Kamenistak <marian@engineeringleaders.io>",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "agents": "^0.9.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.0",
+    "typescript": "^5.7.0",
+    "wrangler": "^4.80.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "!dist/tests",
+    "README.md"
+  ]
+}
