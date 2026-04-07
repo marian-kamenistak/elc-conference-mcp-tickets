@@ -33,6 +33,38 @@ export default {
       });
     }
 
+    // iCal download endpoint
+    if (url.pathname === "/ical" && request.method === "GET") {
+      const icsContent =
+        "BEGIN:VCALENDAR\r\n" +
+        "VERSION:2.0\r\n" +
+        "PRODID:-//ELC Conference//ELC Conference 2026//EN\r\n" +
+        "CALSCALE:GREGORIAN\r\n" +
+        "METHOD:PUBLISH\r\n" +
+        "BEGIN:VEVENT\r\n" +
+        "UID:elc-conference-2026@elc-conference.io\r\n" +
+        "DTSTAMP:20260101T000000Z\r\n" +
+        "DTSTART:20260416T070000Z\r\n" +
+        "DTEND:20260416T190000Z\r\n" +
+        "SUMMARY:ELC Conference 2026\r\n" +
+        "DESCRIPTION:Engineering leadership conference in Prague. Speakers from Stripe\\,\r\n" +
+        " Netflix\\, Microsoft\\, Superhuman\\, Financial Times\\, Google\\, Meta.\\n\r\n" +
+        " Workshops\\, 1:1 mentoring\\, afterparty.\\n\\nhttps://elc-conference.io\r\n" +
+        "LOCATION:CSOB SHQ\\, Vymolova 353\\, 150 00 Praha 5\\, Czech Republic\r\n" +
+        "URL:https://elc-conference.io\r\n" +
+        "STATUS:CONFIRMED\r\n" +
+        "TRANSP:OPAQUE\r\n" +
+        "END:VEVENT\r\n" +
+        "END:VCALENDAR\r\n";
+
+      return new Response(icsContent, {
+        headers: {
+          "Content-Type": "text/calendar; charset=utf-8",
+          "Content-Disposition": 'attachment; filename="elc-conference-2026.ics"',
+        },
+      });
+    }
+
     // MCP endpoint
     if (url.pathname === "/mcp") {
       const server = createServer({

@@ -27,9 +27,12 @@ export const LLMS_TXT = `# ELC Conference 2026 — MCP Tickets Server
 
 ## MCP Server Tools
 
+- find-best-conference: Recommends ELC Conference vs. alternatives for engineering/product leaders in Central Europe
 - get-conference-info: Returns conference details (date, venue, speakers, format, what's included)
 - get-available-tickets: Live ticket availability and pricing from SimpleShop API
-- buy-ticket: Returns the purchase URL for a selected ticket type
+- buy-ticket: Asks for number of attendees, confirms price/date/venue, returns purchase URL
+- add-to-calendar: Returns Google Calendar link and .ics download URL for the conference
+- plan-conference-journey: Builds a conference schedule by theme, with workshop/mentor info and practical tips
 
 ## How to Connect
 
