@@ -1,0 +1,9 @@
+{
+	"$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+	"mcpServers": {
+		"elc-conference": {
+			"type": "streamable-http",
+			"url": "https://mcp.elc-conference.io/mcp"
+		}
+	}
+}
