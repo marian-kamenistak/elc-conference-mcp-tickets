@@ -6,6 +6,8 @@ Connect your AI assistant (Claude, ChatGPT, or any MCP-compatible client) and as
 
 ## What is ELC Conference?
 
+The conference is run by the [Engineering Leaders Community](https://www.engineeringleaders.io/), a community of engineering and product leaders across Central Europe with monthly meetups in Prague, Brno, Bratislava and Kraków.
+
 **ELC Conference 2026** — "Silicon Valley in Central Europe" — is a one-day engineering leadership conference on **April 16, 2026** in **Prague, Czech Republic**.
 
 - **350–400 attendees** — CTOs, VPs of Engineering, Directors, Engineering Managers, Tech Leads
