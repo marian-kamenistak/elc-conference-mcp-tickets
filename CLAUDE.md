@@ -2,6 +2,9 @@
 
 MCP server that lets Claude users browse and buy ELC Conference tickets via SimpleShop.cz.
 
+## Working Discipline
+State your assumptions out loud. If the request is ambiguous, ask. If a simpler approach exists, push back. Stop when you are confused, name what is unclear, do not just pick one interpretation and run.
+
 ## Goal
 
 Build and deploy a simple MCP server that helps people buy tickets for the ELC Conference (https://elc-conference.io/). The purchase experience must be as seamless as possible — minimal friction, minimal steps, guide the user straight to buying.

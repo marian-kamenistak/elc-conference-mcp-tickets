@@ -181,7 +181,7 @@ After submission:
 | Registry | URL | How to submit |
 |----------|-----|---------------|
 | mcp.so | https://mcp.so | Click "Submit" or create issue at `github.com/chatmcp/mcp-directory/issues/1` |
-| PulseMCP | https://pulsemcp.com/servers | Submit at `pulsemcp.com/use-cases/submit` |
+| PulseMCP | https://pulsemcp.com/servers | Auto-indexes from Official MCP Registry (already published) |
 | MCP-Get | https://github.com/mcp-get/community-servers | Submit PR to the repo |
 | awesome-mcp-servers | https://github.com/wong2/awesome-mcp-servers | Submit PR adding server to list |
 | mcpservers.org | https://mcpservers.org | Submit at `mcpservers.org/submit` |
@@ -190,7 +190,8 @@ After submission:
 
 ```
 Name: ELC Conference Tickets
-Description: Browse and buy ELC Conference 2026 engineering leadership tickets in Prague via AI. Live pricing, speaker info, and direct purchase links.
+Website: https://elc-conference.io/
+Description: Browse and buy ELC Conference 2026 (https://elc-conference.io/) engineering leadership tickets in Prague via AI. Live pricing, speaker info, and direct purchase links.
 MCP endpoint: https://mcp.elc-conference.io/mcp
 Transport: Streamable HTTP (also available via npm: elc-conference-mcp-tickets)
 Auth: None (public)
