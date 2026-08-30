@@ -127,3 +127,18 @@ See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for full deployment instructions.
 ### Marketing
 - [ ] Draft LinkedIn posts
 - [ ] Record demo video/GIF
+
+## Stack
+
+TypeScript MCP server, two entry points: `src/worker.ts` (Cloudflare Worker `elc-conference-mcp`,
+custom domain `mcp.elc-conference.io`, `nodejs_compat`) and `src/index.ts` (stdio npm fallback).
+Tools in `src/tools/` (6 files: get-conference-info, get-available-tickets, buy-ticket,
+add-to-calendar, find-best-conference, plan-conference-journey); SimpleShop client in
+`src/simpleshop-client.ts`; tests in `src/tests/` via `npm test`.
+
+## Definition of done
+
+- [ ] `npm run build` exit 0; `npm test` passes; `npm run deploy` exit 0
+- [ ] `POST https://mcp.elc-conference.io/mcp` with `tools/list` returns 6 tools (one per `src/tools/*.ts`; `docs/DEPLOYMENT.md` still says three)
+- [ ] `get-available-tickets` returns live SimpleShop prices, not the table in this file
+- [ ] 60s `npx wrangler@4 tail elc-conference-mcp --format json`: zero `console.error` logs, zero exceptions
