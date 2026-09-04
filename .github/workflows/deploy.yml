@@ -1,0 +1,86 @@
+name: deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      # npm test's own pretest script runs `npm run build` first (tsc), so this step
+      # covers both compiling and testing the compiled output — no separate build step.
+      - name: Test
+        run: npm test
+
+      # This repo's own `build` script excludes src/worker.ts from tsc (it's bundled
+      # directly by wrangler, not via dist/), so `npm run type-check` wouldn't check it.
+      # Bare `tsc --noEmit` (no exclude override) covers the whole src/ tree.
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Install 1Password CLI
+        if: hashFiles('.op-secrets') != ''
+        uses: 1password/install-cli-action@v1
+
+      - name: Sync secrets from 1Password
+        if: hashFiles('.op-secrets') != ''
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          OP_VAULT: "ELC Automation"
+        run: |
+          set -euo pipefail
+          while IFS= read -r line || [ -n "$line" ]; do
+            line="${line%%#*}"
+            line="$(echo "$line" | xargs)"
+            [ -z "$line" ] && continue
+            item="$(echo "$line" | awk '{print $1}')"
+            cf="$(echo "$line" | awk '{print $2}')"
+            [ -z "$cf" ] && cf="$item"
+            if ! op read "op://${OP_VAULT}/${item}/credential" >/dev/null 2>&1; then
+              echo "::error::${item} not readable in vault '${OP_VAULT}'"
+              exit 1
+            fi
+            op read "op://${OP_VAULT}/${item}/credential" | npx wrangler secret put "$cf"
+            echo "synced: ${item} -> ${cf}"
+          done < .op-secrets
+
+      - name: Deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy
+
+      - name: Smoke check — tools/list
+        run: |
+          set -euo pipefail
+          sleep 5
+          # This host is stateless (createMcpHandler — a fresh McpServer per request, no
+          # Durable Object), so it never issues an mcp-session-id and doesn't need one on
+          # tools/list — unlike the other four MCP servers here.
+          resp=$(curl -sf -X POST "https://mcp.elc-conference.io/mcp" \
+            -H 'content-type: application/json' \
+            -H 'accept: application/json, text/event-stream' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}')
+          echo "$resp" | grep -q '"get-started"' || { echo "::error::tools/list missing get-started"; exit 1; }
+          echo "smoke check passed"
