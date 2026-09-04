@@ -42,7 +42,7 @@
     "@posthog/mcp": "0.11.7",
     "agents": "^0.9.0",
     "posthog-node": "5.51.2",
-    "zod": "^3.25.76"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^18.19.0",
