@@ -71,4 +71,5 @@ export interface Env {
   SIMPLESHOP_EMAIL?: string;
   SIMPLESHOP_API_KEY?: string;
   DISCOUNT_CODE?: string;
+  MCP_SESSIONS?: import("./mcp-usage.js").McpSessionsKv;
 }

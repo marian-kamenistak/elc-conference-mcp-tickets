@@ -6,3 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 routes = [
   { pattern = "mcp.elc-conference.io", custom_domain = true }
 ]
+
+[[kv_namespaces]]
+binding = "MCP_SESSIONS"
+id = "f459fd36614740fcbe313953349d7776"

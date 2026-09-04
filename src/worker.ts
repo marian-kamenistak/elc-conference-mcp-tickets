@@ -10,14 +10,10 @@ import {
 } from "./mcp-usage.js";
 
 /**
- * See src/mcp-usage.ts. Two things differ from the other four MCP servers here:
- *
- *  - elc-conference.io has no PostHog project of its own, so these events go to the ELC
- *    project alongside elc-toolkit and elc-partnership-builder. They stay separable by
- *    `$mcp_server_name`. Move the key if the conference ever gets its own project.
- *  - This server is STATELESS (createMcpHandler builds a fresh McpServer per request, with
- *    no Durable Object), so Slack session grouping is resolved by `$session_id` out of an
- *    isolate-local map rather than per-instance. See STATELESS_SESSIONS.
+ * See src/mcp-usage.ts. One thing differs from the other four MCP servers here:
+ * elc-conference.io has no PostHog project of its own, so these events go to the ELC
+ * project alongside elc-toolkit and elc-partnership-builder. They stay separable by
+ * `$mcp_server_name`. Move the key if the conference ever gets its own project.
  *
  * Instrumented here in the Worker, deliberately NOT inside createServer() — that factory is
  * shared with the stdio entrypoint (src/index.ts), which must stay free of network sinks.
@@ -104,7 +100,6 @@ export default {
         env: env as McpUsageEnv,
         geo: geoFromRequest(request),
         waitUntil: (p) => ctx.waitUntil(p),
-        stateless: true,
       });
 
       const handler = createMcpHandler(server);
