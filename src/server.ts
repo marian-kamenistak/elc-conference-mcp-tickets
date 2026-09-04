@@ -1,5 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SimpleShopClient } from "./simpleshop-client.js";
+import { registerGetStarted } from "./tools/get-started.js";
+import { registerGetMoreTools } from "./tools/get-more-tools.js";
 import { registerGetConferenceInfo } from "./tools/get-conference-info.js";
 import { registerGetAvailableTickets } from "./tools/get-available-tickets.js";
 import { registerBuyTicket } from "./tools/buy-ticket.js";
@@ -27,6 +29,8 @@ export function createServer(config: ServerConfig): McpServer {
     );
   }
 
+  registerGetStarted(server);
+  registerGetMoreTools(server);
   registerFindBestConference(server);
   registerGetConferenceInfo(server);
   registerGetAvailableTickets(server, shopClient);
