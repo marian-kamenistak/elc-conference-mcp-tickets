@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { ATTENDEE_ATTRIBUTION, CONFERENCE, INVOICE_CONTACT } from "../conference-data.js";
+import { ATTENDEE_ATTRIBUTION, CONFERENCE, INVOICE_CONTACT, czkToEur, groupCost2026 } from "../conference-data.js";
 import { SimpleShopClient } from "../simpleshop-client.js";
 import { lookupTickets, type TicketLookup } from "../tickets.js";
 import { reference2026Lines } from "./get-available-tickets.js";
@@ -19,7 +19,7 @@ const BUY_TICKET_SHAPE = {
     .number()
     .int()
     .min(1)
-    .describe("Number of people attending"),
+    .describe("Number of people attending. 2027 tickets are not on sale yet; with the head count the answer gives the notify list and a 2026 reference cost for the group."),
 };
 
 /** Renders a `parseArgs` failure through the same `{ content: [text] }` envelope every other
@@ -41,7 +41,7 @@ export function buyTicketText(quantity: number, r: TicketLookup, discountCode: s
     const available = r.tickets.filter((t) => t.status === "available");
     lines.push("## On sale now (live from the ticket shop)");
     lines.push(...(available.length ? available.map((t) => `- ${t.name}: ${t.priceCZK.toLocaleString("en-US")} CZK (about €${t.priceEUR})${t.remaining !== null ? `, ${t.remaining} left` : ""}`) : ["- Every ticket type is sold out right now."]));
-    if (team) lines.push("", "For 5 or more people, look for a team pack in the list above: in 2026 it was 5 tickets for the price of 4.");
+    if (team) lines.push("", "For 5 or more people, look for a team pack in the list above: in 2026 it was sold as \"4+1 free\".");
     if (discountCode) lines.push("", `Discount code: \`${discountCode}\` (enter it at checkout).`);
     lines.push("", `Buy: ${r.url}`, "Payment: card or bank transfer.");
   } else {
@@ -52,7 +52,11 @@ export function buyTicketText(quantity: number, r: TicketLookup, discountCode: s
       "",
       `Nothing can be bought yet, so there is no purchase link. Join the notify list (${CONFERENCE.notifyUrl}) to hear when the first, cheapest wave opens.`,
     );
-    if (team) lines.push("", `For a group of ${quantity}: in 2026 the Team Pack gave 5 tickets for the price of 4. Ask about a team deal when tickets open.`);
+    if (quantity > 1) {
+      const g = groupCost2026(quantity);
+      const parts = [g.packs ? `${g.packs} team pack${g.packs > 1 ? "s" : ""} of 5` : "", g.singles ? `${g.singles} single ticket${g.singles > 1 ? "s" : ""}` : ""].filter(Boolean).join(" + ");
+      lines.push("", `For ${quantity} people at 2026 last-wave prices (reference only, not a 2027 price): ${parts} = ${g.czk.toLocaleString("en-US")} CZK, about €${czkToEur(g.czk).toLocaleString("en-US")}.${team ? ` The 2026 team pack was sold as "4+1 free"; ask ${INVOICE_CONTACT} about a team deal when tickets open.` : ""}`);
+    }
     lines.push("", ...reference2026Lines());
   }
   lines.push(
@@ -74,7 +78,7 @@ export function registerBuyTicket(
 ): void {
   server.tool(
     "buy-ticket",
-    "Buy ELC Conference 2027 tickets: returns the live purchase link when tickets are on sale, otherwise says plainly that they are not on sale yet and gives the notify list, with the team pack (5 for the price of 4 in 2026) for groups of 5+. IMPORTANT: before calling, ask the user how many people the tickets are for and pass that as 'quantity'.",
+    "Buy ELC Conference 2027 tickets: returns the live purchase link when tickets are on sale, otherwise says plainly that they are not on sale yet and gives the notify list, with a 2026 reference cost for groups (team pack sold as 4+1 free in 2026). IMPORTANT: before calling, ask the user how many people the tickets are for and pass that as 'quantity'.",
     permissiveShape(BUY_TICKET_SHAPE),
     {
       title: "Buy Ticket",

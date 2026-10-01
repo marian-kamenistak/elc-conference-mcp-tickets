@@ -18,7 +18,7 @@ export const TOOL_MENU: MenuItem[] = [
   // Attending: tickets, perks, the day
   { name: "find-best-conference", group: "attend", question: "Which conference should an engineering or product leader in Central Europe go to?", description: "ELC Conference 2027 against the alternatives, with the 2026 results." },
   { name: "get-conference-info", group: "attend", question: "What is ELC Conference 2027: when, where, who speaks, what topics?", description: "Date status, city, format, audience, topics, past speakers, 2026 results, links." },
-  { name: "get-attendee-perks", group: "attend", question: "What do I get with a ticket, and is there a team deal?", description: "What a ticket includes (talks, workshops, 1:1 mentoring, experience zones, catering, afterparty), the 5-for-4 team pack, invoices." },
+  { name: "get-attendee-perks", group: "attend", question: "What do I get with a ticket, and is there a team deal?", description: "What a ticket includes (talks, workshops, 1:1 mentoring, experience zones, catering, afterparty), the 2026 team pack (sold as 4+1 free), invoices." },
   { name: "get-available-tickets", group: "attend", question: "Are tickets on sale, and what do they cost?", description: "Live ticket status from the shop; 2026 prices for reference while 2027 prices are not out." },
   { name: "buy-ticket", group: "attend", question: "How do I buy tickets for me or my team?", description: "Purchase link when tickets are on sale, otherwise the notify list; team pack for 5+." },
   { name: "add-to-calendar", group: "attend", question: "Can you put it in my calendar?", description: "Calendar status: the 2027 date is not announced yet, so it says how to get notified." },

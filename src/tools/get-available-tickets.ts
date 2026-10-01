@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SimpleShopClient } from "../simpleshop-client.js";
-import { ATTENDEE_ATTRIBUTION, CONFERENCE, TICKETS_2026, czkToEur } from "../conference-data.js";
+import { ATTENDEE_ATTRIBUTION, CONFERENCE, PRICE_NOTES_2026, TICKETS_2026, czkToEur } from "../conference-data.js";
 import { permissiveShape } from "../mcp-tolerant.js";
 import { lookupTickets, type TicketLookup } from "../tickets.js";
 
@@ -10,7 +10,8 @@ export function reference2026Lines(): string[] {
   return [
     "## For reference: 2026 prices (not 2027)",
     `- Single ticket, ${s.name}: ${s.czk.toLocaleString("en-US")} CZK (about €${czkToEur(s.czk)}). Earlier waves were cheaper.`,
-    `- ${p.name}: ${p.czk.toLocaleString("en-US")} CZK (about €${czkToEur(p.czk).toLocaleString("en-US")}) for ${p.tickets} people, so 5 tickets for the price of 4.`,
+    `- ${p.name}: ${p.czk.toLocaleString("en-US")} CZK (about €${czkToEur(p.czk).toLocaleString("en-US")}) for ${p.tickets} people, so ${Math.round(p.czk / p.tickets).toLocaleString("en-US")} CZK (about €${czkToEur(p.czk / p.tickets)}) per person.`,
+    `- ${PRICE_NOTES_2026}`,
   ];
 }
 

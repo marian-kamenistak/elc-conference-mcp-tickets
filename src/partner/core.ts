@@ -38,7 +38,7 @@ export function findAddon(id: string): Addon | undefined {
 }
 
 function seatsLabel(p: Package): string {
-	return p.seats === null ? "open (no seat limit)" : `${p.seats} seats (companies that can take it)`;
+	return p.seats === null ? "open to any number of companies" : `${p.seats} partner places (up to ${p.seats} companies can take this package)`;
 }
 
 /* ─────────────────────────── packages and add-ons ─────────────────────────── */
@@ -47,7 +47,7 @@ export function packageMarkdown(p: Package): string {
 	return [
 		`### ${p.name} — ${eur(p.price)} ex VAT`,
 		`*${p.tagline}*`,
-		`- Seats: ${seatsLabel(p)}`,
+		`- Partner places: ${seatsLabel(p)}`,
 		`- Best for: ${p.best_for.join(", ")}`,
 		`- Includes:`,
 		...p.includes.map((i) => `  - ${i}`),
@@ -110,7 +110,7 @@ export function compareMarkdown(): string {
 	const ps = OFFER.packages;
 	const rows: [string, (p: Package) => string][] = [
 		["Price (ex VAT)", (p) => eur(p.price)],
-		["Seats", (p) => (p.seats === null ? "open" : String(p.seats))],
+		["Partner places (companies)", (p) => (p.seats === null ? "open" : String(p.seats))],
 		["Tickets", (p) => pick(p, /tickets?$/i)?.replace(/ tickets?$/i, "") ?? "—"],
 		["Booth in the Experience Zone", (p) => (pick(p, /booth/i) ? "yes" : "—")],
 		["Speakers' dinner", (p) => {
@@ -150,6 +150,7 @@ export interface QuoteInput {
 	package?: string;
 	addons?: string[];
 	sign_date?: string;
+	budget_eur?: number;
 }
 
 export interface QuoteLine {
@@ -166,6 +167,9 @@ export interface Quote {
 	package: string;
 	addons: string[];
 	sign_date: string;
+	/** true when the caller gave no (or a past) sign_date and the quote assumes signing today. */
+	sign_date_assumed: boolean;
+	budget_eur: number | null;
 	lines: QuoteLine[];
 	list_total: number;
 	addon_discount: number;
@@ -218,12 +222,14 @@ export function quotePartnership(input: QuoteInput, today: string): QuoteResult 
 	}
 
 	let signDate = input.sign_date?.trim() || today;
+	let assumed = !input.sign_date?.trim();
 	if (!isValidIsoDate(signDate)) {
-		return { ok: false, error: `sign_date must be a date in YYYY-MM-DD format, e.g. 2026-11-15 (got \`${input.sign_date}\`).` };
+		return { ok: false, error: `sign_date must be a real calendar date in YYYY-MM-DD format, e.g. 2026-11-15 (got \`${input.sign_date}\`).` };
 	}
 	if (signDate < today) {
 		notes.push(`sign_date ${signDate} is in the past, so the quote uses today (${today}).`);
 		signDate = today;
+		assumed = true;
 	}
 
 	const lines: QuoteLine[] = [
@@ -244,7 +250,7 @@ export function quotePartnership(input: QuoteInput, today: string): QuoteResult 
 			list_price: a.price,
 			discount_percent: off,
 			price: round2(a.price * (1 - off / 100)),
-			...(off ? { note: `second most expensive add-on, ${off}% off` } : {}),
+			...(off ? { note: `second most expensive add-on, ${off}% off${byPrice[0].price === a.price ? " (equal prices: catalogue order decides)" : ""}` } : {}),
 		});
 	}
 
@@ -263,6 +269,8 @@ export function quotePartnership(input: QuoteInput, today: string): QuoteResult 
 			package: pkg.id,
 			addons: byPrice.map((a) => a.id),
 			sign_date: signDate,
+			sign_date_assumed: assumed,
+			budget_eur: input.budget_eur ?? null,
 			lines,
 			list_total: listTotal,
 			addon_discount: round2(listTotal - subtotal),
@@ -289,12 +297,20 @@ export function quoteMarkdown(q: Quote): string {
 		...rows,
 		`| **Subtotal** | ${eur(q.list_total)} | ${q.addon_discount ? `−${eur(q.addon_discount)}` : "—"} | **${eur(q.subtotal)}** |`,
 		q.early_sign.applies
-			? `| Early-sign discount (signed ${q.sign_date}, deadline ${q.early_sign.deadline}) | | −${q.early_sign.percent}% | −${eur(q.early_sign.amount)} |`
+			? `| Early-sign discount (contract signed by ${q.early_sign.deadline}${q.sign_date_assumed ? `; this quote assumes signing today, ${q.sign_date}` : `; planned signature ${q.sign_date}`}) | | −${q.early_sign.percent}% | −${eur(q.early_sign.amount)} |`
 			: `| Early-sign discount (deadline ${q.early_sign.deadline}) | | not applicable | ${eur(0)} |`,
 		`| **Total ex VAT** | | | **${eur(q.total_ex_vat)}** |`,
 		"",
+		...(q.early_sign.applies ? [`- Nothing is signed yet. Signed after ${q.early_sign.deadline}, the same order costs ${eur(q.subtotal)} ex VAT.`] : []),
+		...(q.budget_eur !== null
+			? [q.total_ex_vat <= q.budget_eur
+				? `- Budget ${eur(q.budget_eur)}: this fits, ${eur(round2(q.budget_eur - q.total_ex_vat))} to spare.${q.early_sign.applies && q.subtotal > q.budget_eur ? ` Only if signed by ${q.early_sign.deadline}: without the early-sign discount it is ${eur(round2(q.subtotal - q.budget_eur))} over.` : ""}`
+				: `- Budget ${eur(q.budget_eur)}: this is ${eur(round2(q.total_ex_vat - q.budget_eur))} over.${q.lines.length > 1 && q.lines[0].price * (q.early_sign.applies ? 1 - q.early_sign.percent / 100 : 1) <= q.budget_eur ? ` The ${q.lines[0].name} package alone is ${eur(round2(q.lines[0].price * (q.early_sign.applies ? 1 - q.early_sign.percent / 100 : 1)))} and fits.` : ""}`]
+			: []),
+		...q.lines.filter((l) => l.note).map((l) => `- ${l.name}: ${l.note}.`),
 		...q.notes.map((n) => `- ${n}`),
 		`- Renewal: ${q.renewal_note}`,
+		`- The discounts above are the only published ones; anything else is a conversation on a call: ${OFFER.links.book_a_call}`,
 		`- ${OFFER.vat} This is an indicative quote computed from the published offer; the contract is the binding document.`,
 		"",
 		`Next step: \`request_partnership_offer\` sends this to the ELC team, or book a call: ${OFFER.links.book_a_call}`,
@@ -382,8 +398,13 @@ export function recommendationMarkdown(r: Recommendation): string {
 		const anyMatch = r.ranked.filter((x) => x.score > 0);
 		lines.push(
 			r.budget_eur !== null && anyMatch.length
-				? `No package matching these goals fits ${eur(r.budget_eur)}. Closest matches: ${anyMatch.map((x) => `${x.name} ${eur(x.price)}${r.early_sign_applies ? ` (${eur(x.effective_price)} if signed by ${early.deadline})` : ""}`).join(", ")}. The smallest package is ${cheapest.name} at ${eur(cheapest.price)}.`
+				? `No package matching these goals fits ${eur(r.budget_eur)}. Closest match${anyMatch.length > 1 ? "es" : ""}: ${anyMatch.map((x) => `${x.name} ${eur(x.price)}${r.early_sign_applies ? ` (${eur(x.effective_price)} if signed by ${early.deadline})` : ""}`).join(", ")}. The smallest package is ${cheapest.name} at ${eur(cheapest.price)}.`
 				: `No package matches these goals directly. The smallest package is ${cheapest.name} at ${eur(cheapest.price)}; a call is the fastest way to shape something: ${OFFER.links.book_a_call}`,
+		);
+		lines.push(
+			"",
+			`If what you want is year-round (meetups, newsletter, talent access across the year) rather than the conference day, that is a separate offer with its own MCP server and smaller entry points: ${COMMUNITY_PARTNERSHIP_MCP}`,
+			"Just want to be there? Tickets are the cheapest way: `get-available-tickets`.",
 		);
 	} else {
 		lines.push(`## Pick: ${top.name} — ${eur(top.price)} ex VAT${r.early_sign_applies ? ` (${eur(top.effective_price)} if signed by ${early.deadline})` : ""}`);
@@ -395,10 +416,10 @@ export function recommendationMarkdown(r: Recommendation): string {
 	}
 	if (r.addon_ideas.length && top) {
 		lines.push("", "## Add-ons worth a look", ...r.addon_ideas.map((a) => `- ${a.name} (${eur(a.price)}, \`${a.id}\`): ${a.why}`));
-		if (r.addon_ideas.length >= 2) lines.push(OFFER.pricing_rules.second_addon_discount.rule);
+		if (r.addon_ideas.length >= 2) lines.push(`${OFFER.pricing_rules.second_addon_discount.rule} Each add-on above fits the remaining budget on its own; check a combination with \`quote_partnership\` and \`budget_eur\`.`);
 	}
 	if (r.goals.includes("brand") || r.goals.includes("reach_executives")) {
-		lines.push("", `Note: ${OFFER.event.principle}`);
+		lines.push("", `Note: ${OFFER.event.principle} ${OFFER.pricing_rules.attendee_lists}`);
 	}
 	if (top) lines.push("", `Exact total: \`quote_partnership\` with package \`${top.id}\`.`);
 	lines.push("", ATTRIBUTION);

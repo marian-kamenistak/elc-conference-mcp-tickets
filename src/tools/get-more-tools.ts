@@ -2,6 +2,19 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { getMoreToolsResult } from "@posthog/mcp";
 import { getStartedResult } from "./get-started.js";
+import { COMMUNITY_PARTNERSHIP_MCP } from "../links.js";
+import { OFFER } from "../partner/offer.js";
+
+/** Appended to the SDK's capability-gap acknowledgement, so a real described need still gets the
+ *  three answers people most often look for here instead of a dead end (persona test 2026-10-01). */
+function routingHints(): string {
+  return [
+    "The three things people most often look for here:",
+    `- A year-round partnership with the Engineering Leaders Community (meetups, newsletter, talent access across the year, not the conference day): a separate MCP server, ${COMMUNITY_PARTNERSHIP_MCP}`,
+    `- A paid main-stage talk or the attendee list: neither is for sale. ${OFFER.event.principle} ${OFFER.pricing_rules.attendee_lists}`,
+    "- Anything else about the conference, tickets or partnering: call `get-started` for the full menu.",
+  ].join("\n");
+}
 
 /** Matches a bare liveness/greeting ping — "hi", "test", "are you there" — as opposed to a
  *  real described capability gap. Deliberately an exact (trimmed, punctuation-stripped)
@@ -46,6 +59,6 @@ export function registerGetMoreTools(server: McpServer): void {
     async ({ context }) =>
       !context || GREETING_PING.test(context.trim())
         ? getStartedResult()
-        : { content: getMoreToolsResult().content }
+        : { content: [{ type: "text" as const, text: routingHints() }, ...getMoreToolsResult().content] }
   );
 }

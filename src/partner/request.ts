@@ -63,7 +63,7 @@ export async function requestOffer(req: OfferRequest, fetchImpl: typeof fetch = 
 	if (!q.ok) return { text: q.error, isError: true };
 
 	const outcome = await postOffer({ ...req, addons: q.quote.addons }, fetchImpl);
-	const quote = quoteMarkdown(q.quote).replace(/\n\nSource: .*$/s, "");
+	const quote = quoteMarkdown(q.quote).replace(/\n\nNext step: .*$/s, "");
 	if (outcome.sent) {
 		return {
 			isError: false,
@@ -71,6 +71,8 @@ export async function requestOffer(req: OfferRequest, fetchImpl: typeof fetch = 
 				`Sent. The ELC team received the partnership request from ${req.name} (${req.company}) and will reply to ${req.email}.`,
 				"",
 				quote,
+				"",
+				`The written offer follows the published rules: ${OFFER.event.principle} ${OFFER.pricing_rules.attendee_lists}`,
 				"",
 				`Want to talk sooner? Book a call with Marian: ${OFFER.links.book_a_call}`,
 				"",

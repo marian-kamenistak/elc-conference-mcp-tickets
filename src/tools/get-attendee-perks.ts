@@ -26,14 +26,14 @@ export function attendeePerksText(): string {
     "",
     "## What the day looked like in 2026",
     `- ${e.talks} main-stage talks and ${e.workshops} hands-on workshops, ${e.speakers} speakers in total`,
-    `- A mentoring zone with ${e.mentors} mentors for 1:1 conversations`,
+    `- A mentoring zone with ${e.mentors} mentors for 1:1 conversations (slots are limited, so book early)`,
     "- Experience zones with partner booths",
     "- A five-minute live pub quiz on the big screen, played on your phone",
     "- The afterparty after the last talk",
     `- ${CONFERENCE.language}`,
     "",
     "## Bringing your team",
-    `In 2026 the Team Pack was 5 tickets for the price of 4 ("4+1 free"): the last-wave pack cost ${pack.czk.toLocaleString("en-US")} CZK (about €${czkToEur(pack.czk).toLocaleString("en-US")}) for five people, against ${single.czk.toLocaleString("en-US")} CZK (about €${czkToEur(single.czk)}) for one single ticket. Earlier waves were cheaper. Whether 2027 keeps the team pack, and at what price, is announced when tickets open.`,
+    `In 2026 the Team Pack was sold as "4+1 free": five tickets for one price. The last-wave pack cost ${pack.czk.toLocaleString("en-US")} CZK (about €${czkToEur(pack.czk).toLocaleString("en-US")}) for five people, about ${Math.round(pack.czk / pack.tickets).toLocaleString("en-US")} CZK (€${czkToEur(pack.czk / pack.tickets)}) per person, against ${single.czk.toLocaleString("en-US")} CZK (about €${czkToEur(single.czk)}) for one last-wave single ticket. Earlier waves were cheaper. Whether 2027 keeps the team pack, and at what price, is announced when tickets open. For a group of any size, \`buy-ticket\` with the head count adds it up at 2026 prices.`,
     "",
     "## Practical",
     "- Tickets are released in waves over time, each with limited availability.",
@@ -50,7 +50,7 @@ export function attendeePerksText(): string {
 export function registerGetAttendeePerks(server: McpServer): void {
   server.tool(
     "get-attendee-perks",
-    "What an ELC Conference 2027 ticket includes for an attendee: main-stage talks, hands-on workshops, 1:1 mentoring, experience zones, all-day catering and the afterparty, the pub quiz, the team pack (5 tickets for the price of 4 in 2026), paying by invoice and how to get notified when tickets open. Use when someone asks what they get for a ticket, whether it is worth it, or about a group/team discount.",
+    "What an ELC Conference 2027 ticket includes for an attendee: main-stage talks, hands-on workshops, 1:1 mentoring, experience zones, all-day catering and the afterparty, the pub quiz, the team pack (sold as 4+1 free in 2026), paying by invoice and how to get notified when tickets open. Use when someone asks what they get for a ticket, whether it is worth it, or about a group/team discount.",
     permissiveShape({}),
     {
       title: "Attendee Perks",

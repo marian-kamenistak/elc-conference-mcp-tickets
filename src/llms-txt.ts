@@ -14,7 +14,7 @@ export const LLMS_TXT = `# ${CONFERENCE.name}: MCP server (tickets, attendee per
 - Date: ${CONFERENCE.when}
 - Venue: ${CONFERENCE.venue}
 - Tickets: ${CONFERENCE.ticketStatus2027}
-- 2026 edition: ${CONFERENCE.edition2026.attendees} attendees from ${CONFERENCE.edition2026.companies} companies, rated ${CONFERENCE.edition2026.rating}/5. 2027 target: ${CONFERENCE.attendeesTarget2027}.
+- 2026 edition: ${CONFERENCE.edition2026.attendees} attendees from ${CONFERENCE.edition2026.companies} companies, rated ${CONFERENCE.edition2026.rating}/5. Attendance target 2027: ${CONFERENCE.attendeesTarget2027}.
 - ${CONFERENCE.headlineClaim}
 
 ## Tools: attending

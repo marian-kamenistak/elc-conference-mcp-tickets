@@ -11,7 +11,7 @@ export function conferenceInfoText(): string {
     ...statusLines(),
     `- Format: ${CONFERENCE.format}`,
     `- Language: ${CONFERENCE.language}`,
-    `- Expected attendance 2027: ${CONFERENCE.attendeesTarget2027}`,
+    `- Attendance target 2027: ${CONFERENCE.attendeesTarget2027} (a target, not a result)`,
     "",
     "## Who it is for",
     CONFERENCE.audience,

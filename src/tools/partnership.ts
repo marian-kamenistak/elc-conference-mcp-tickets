@@ -78,7 +78,7 @@ export function registerPartnership(server: McpServer, opts: PartnershipOptions 
 	);
 
 	const PACKAGE_SHAPE = {
-		id: z.enum(PACKAGE_IDS).describe(`Package id: ${OFFER.packages.map((p) => `${p.id} (${p.name})`).join(", ")}.`),
+		id: z.enum(PACKAGE_IDS).describe(`The package: ${OFFER.packages.map((p) => `${p.id} (${p.name})`).join(", ")}.`),
 	};
 	server.registerTool(
 		"get_package",
@@ -136,18 +136,16 @@ export function registerPartnership(server: McpServer, opts: PartnershipOptions 
 	);
 
 	const QUOTE_SHAPE = {
-		package: z
-			.enum(PACKAGE_IDS)
-			.optional()
-			.describe(`Needed for any quote — add-ons are sold only with a package. One of: ${PACKAGE_IDS.join(", ")}.`),
-		addons: z.array(z.enum(ADDON_IDS)).optional().describe(`Add-on ids, optional: ${ADDON_IDS.join(", ")}.`),
+		package: z.enum(PACKAGE_IDS).describe("The package to quote. Add-ons are sold only together with a package."),
+		addons: z.array(z.enum(ADDON_IDS)).optional().describe("Add-ons to include, optional."),
 		sign_date: z.string().optional().describe("Planned contract signature date, YYYY-MM-DD. Defaults to today. Decides the 10% early-sign discount."),
+		budget_eur: z.number().positive().optional().describe("The buyer's budget in EUR ex VAT, optional. The quote then says whether it fits, and whether it fits only with the early-sign discount."),
 	};
 	server.registerTool(
 		"quote_partnership",
 		{
 			title: "Quote a partnership",
-			description: `Exact price of an ${OFFER.event.name} partnership: a package plus optional add-ons, with the published rules applied — the second most expensive add-on 25% off when there are two or more, then 10% off the whole order if signed by ${OFFER.pricing_rules.early_sign_discount.deadline}. Returns line items, discounts, total ex VAT and the renewal note. Always use this instead of adding up prices yourself.`,
+			description: `Exact price of an ${OFFER.event.name} partnership: a package plus optional add-ons, with the published rules applied — the second most expensive add-on 25% off when there are two or more, then 10% off the whole order if signed by ${OFFER.pricing_rules.early_sign_discount.deadline}. Returns line items, discounts, total ex VAT, what the same order costs without the early-sign discount and, if you pass budget_eur, whether it fits. Always use this instead of adding up prices yourself.`,
 			inputSchema: permissiveShape(QUOTE_SHAPE),
 			annotations: READ_ONLY,
 		},
@@ -184,8 +182,8 @@ export function registerPartnership(server: McpServer, opts: PartnershipOptions 
 		name: z.string().min(1).describe("Full name of the person asking."),
 		email: z.string().email().describe("Work email the offer goes to."),
 		company: z.string().min(1).describe("Company name."),
-		package: z.enum(PACKAGE_IDS).describe(`Package id: ${PACKAGE_IDS.join(", ")}.`),
-		addons: z.array(z.enum(ADDON_IDS)).optional().describe(`Add-on ids, optional: ${ADDON_IDS.join(", ")}.`),
+		package: z.enum(PACKAGE_IDS).describe("The package the offer is for."),
+		addons: z.array(z.enum(ADDON_IDS)).optional().describe("Add-ons to include, optional."),
 		message: z.string().max(2000).optional().describe("Anything the team should know: goals, timing, questions. Optional."),
 	};
 	server.registerTool(

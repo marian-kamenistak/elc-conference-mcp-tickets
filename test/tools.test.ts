@@ -76,7 +76,7 @@ describe("2027 refresh: nothing invented, nothing stale", () => {
 	});
 	it("perks: what a ticket includes, the team pack and invoices", async () => {
 		const t = (await call("get-attendee-perks")).text;
-		for (const s of ["workshops", "1:1 mentoring", "afterparty", "5 tickets for the price of 4", "pub quiz", "weare@engineeringleaders.io"]) expect(t).toContain(s);
+		for (const s of ["workshops", "1:1 mentoring", "afterparty", "4+1 free", "pub quiz", "weare@engineeringleaders.io"]) expect(t).toContain(s);
 	});
 	it("audience proof carries the headline claim and the speaker wall", async () => {
 		const t = (await call("get_audience_and_proof")).text;
@@ -126,5 +126,48 @@ describe("offer copy", () => {
 	const canonical = join(homedir(), "ai/business/elcc/data/conference-offer-2027.json");
 	it.skipIf(!existsSync(canonical))("src/data/offer-2027.ts matches the canonical JSON", () => {
 		execFileSync("node", ["scripts/sync-offer.mjs", "--check"], { stdio: "pipe" });
+	});
+});
+
+describe("persona test 2026-10-01 regressions", () => {
+	it("Lenka/Richard: a quote without sign_date says it ASSUMES signing today, and shows the post-deadline price", async () => {
+		const t = (await call("quote_partnership", { package: "navigator", addons: ["partner-workshop"] })).text;
+		expect(t).toMatch(/assumes signing today/);
+		expect(t).not.toMatch(/\(signed \d{4}-/);
+		expect(t).toContain("Signed after 2026-12-31, the same order costs €16,000");
+	});
+	it("Lenka/Ondrej/Jana: budget_eur says fits / over / fits only with early-sign", async () => {
+		expect((await call("quote_partnership", { package: "navigator", addons: ["partner-workshop"], sign_date: "2026-10-01", budget_eur: 15000 })).text).toMatch(/fits.*Only if signed by 2026-12-31/);
+		expect((await call("quote_partnership", { package: "pioneer", addons: ["partner-workshop"], budget_eur: 6000 })).text).toMatch(/over\./);
+	});
+	it("Martin/Richard/Tomasz: a real described need in get_more_tools still gets routing, not a dead end", async () => {
+		const t = (await call("get_more_tools", { context: "we want to partner with the community all year, not just the conference" })).text;
+		expect(t).toContain("https://www.engineeringleaders.io/mcp/partnership");
+		expect(t).toMatch(/main-stage talk or the attendee list: neither is for sale/);
+	});
+	it("Martin: no package fits → the year-round server and tickets are offered", async () => {
+		const t = (await call("recommend_package", { goals: ["grow_leaders"], budget_eur: 20000 })).text;
+		expect(t).toContain("https://www.engineeringleaders.io/mcp/partnership");
+	});
+	it("Petra/Tomasz: team pack is never claimed as exact 5-for-4 arithmetic; a group of 6 gets a 2026 sum", async () => {
+		const t = (await call("buy-ticket", { quantity: 6 })).text;
+		expect(t).toContain("1 team pack of 5 + 1 single ticket = 62,348 CZK");
+		for (const n of ["get-attendee-perks", "get-available-tickets"]) expect((await call(n)).text).not.toMatch(/price of 4/);
+	});
+	it("Petra/Tomasz/Jana: no 'small enough' next to a 600+ target; target labelled once", async () => {
+		const t = (await call("find-best-conference")).text;
+		expect(t).not.toMatch(/small enough/);
+		expect(t).not.toMatch(/\(target\) attendees|600\+ \(target\) \(/);
+	});
+	it("Jana/Ondrej/Martin: enum help text is not duplicated", async () => {
+		expect((await call("quote_partnership", {})).text).not.toMatch(/One of: partner, luminary, navigator, pioneer\.\s*One of/);
+	});
+	it("Richard: a sent offer restates the no-paid-stage and no-attendee-list rules", async () => {
+		const { requestOffer } = await import("../src/partner/request.js");
+		const ok = (async () => new Response('{"ok":true}', { status: 200 })) as unknown as typeof fetch;
+		const r = await requestOffer({ name: "R", email: "r@example.com", company: "X", package: "partner", message: "keynote or no deal" }, ok);
+		expect(r.text).toMatch(/A paid slot on the main stage does not exist/);
+		expect(r.text).toMatch(/does not share attendee lists/);
+		expect(r.text).not.toMatch(/Next step: `request_partnership_offer`/);
 	});
 });

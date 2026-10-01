@@ -31,10 +31,11 @@ export const CONFERENCE = {
   tagline: "Own. Lead. Evolve.",
   format: OFFER.event.format,
   language: "English. All talks and official programming are in English.",
-  attendeesTarget2027: P.attendees_target_2027,
+  /** "600+" — the offer says "600+ (target)"; callers label it as a target themselves. */
+  attendeesTarget2027: P.attendees_target_2027.replace(/\s*\(target\)\s*$/i, ""),
   audience:
     "Current leaders (CTOs, VPs of Engineering, Engineering Managers, Tech Leads), product and strategy (Product Managers, technical founders) and future leaders (senior engineers preparing to step up).",
-  headlineClaim: P.headline_claim,
+  headlineClaim: `${P.headline_claim} (Basis: ${P.headline_claim_basis})`,
   topics: [
     "Engineering leadership",
     "Scaling teams",
@@ -76,11 +77,22 @@ export const TICKET_INCLUDES_2026 = [
  *  2027 prices are not announced. */
 export const TICKETS_2026 = {
   single: { name: "3rd wave, Senior Leader", czk: 12973 },
-  teamPack: { name: "3rd wave, Senior Leader Team Pack (4+1 free)", czk: 49375, tickets: 5 },
+  teamPack: { name: "3rd wave, Senior Leader Team Pack (sold as \"4+1 free\")", czk: 49375, tickets: 5 },
   czkPerEur: 25.2,
 } as const;
 
 export const czkToEur = (czk: number) => Math.round(czk / TICKETS_2026.czkPerEur);
+
+/** Ticket names are wave names ("Senior Leader" is the 3rd wave), not roles; VAT treatment of the
+ *  2026 prices is not stated in our records. Said once wherever 2026 prices appear. */
+export const PRICE_NOTES_2026 = "Ticket names are wave names, not roles: \"Senior Leader\" was the 3rd and last wave, open to anyone. The VAT treatment of these 2026 prices is not stated in our records.";
+
+/** 2026 reference cost for a group: team packs of 5 plus single last-wave tickets. */
+export function groupCost2026(quantity: number): { packs: number; singles: number; czk: number } {
+  const packs = Math.floor(quantity / TICKETS_2026.teamPack.tickets);
+  const singles = quantity - packs * TICKETS_2026.teamPack.tickets;
+  return { packs, singles, czk: packs * TICKETS_2026.teamPack.czk + singles * TICKETS_2026.single.czk };
+}
 
 export const INVOICE_CONTACT = "weare@engineeringleaders.io";
 

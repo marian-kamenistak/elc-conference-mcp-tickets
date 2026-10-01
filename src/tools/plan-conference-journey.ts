@@ -89,7 +89,7 @@ IMPORTANT: Before calling this tool, always ask the user what their role is (CTO
         ...statusLines(),
         "",
         "## Your priority themes",
-        `Ranked for a ${role}, from the topics the conference covers:`,
+        `Ranked for ${/^[AEIOU]/.test(role) ? "an" : "a"} ${role}, from the topics the conference covers:`,
         focus.themes.map((t, i) => `${i + 1}. ${t}`).join("\n"),
         "",
         "## Talks and speakers",
