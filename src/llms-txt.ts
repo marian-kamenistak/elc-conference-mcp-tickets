@@ -1,48 +1,37 @@
-export const LLMS_TXT = `# ELC Conference 2026 — MCP Tickets Server
+import { CONFERENCE } from "./conference-data.js";
+import { COMMUNITY_PARTNERSHIP_MCP, DOCS_URL, MCP_ENDPOINT, REPO_URL } from "./links.js";
+import { TOOL_MENU } from "./menu.js";
+import { OFFER } from "./partner/offer.js";
 
-> ELC Conference is a one-day engineering leadership conference on April 16, 2026 in Prague, Czech Republic. 350–400 attendees. Speakers from Stripe, Netflix, Microsoft, Superhuman, Financial Times, Google, Meta. This is an MCP (Model Context Protocol) server that lets AI assistants browse and purchase conference tickets via SimpleShop.cz. First conference in Central Europe with AI-powered ticket purchasing.
+const tools = (group: "attend" | "partner") =>
+  TOOL_MENU.filter((t) => t.group === group).map((t) => `- ${t.name}: ${t.question}`).join("\n");
 
-## About the Conference
+export const LLMS_TXT = `# ${CONFERENCE.name}: MCP server (tickets, attendee perks, partnerships)
 
-- Date: April 16, 2026, 9:00 AM – 9:00 PM CEST
-- Venue: CSOB SHQ (Centrala CSOB), Vymolova 353, 150 00 Praha 5, Czech Republic
-- Capacity: 350–400 attendees
-- Format: 12 main stage speakers, 16 hands-on workshops, 10 mentors for 1:1 sessions, afterparty
-- Audience: CTOs, VPs of Engineering, Directors, Engineering Managers, Product Managers, Tech Leads
-- Website: https://elc-conference.io
-- Tickets: https://form.simpleshop.cz/qGAKO/buy/
+> ${CONFERENCE.name} is the engineering leadership conference in ${CONFERENCE.city}, ${CONFERENCE.when}, run by the Engineering Leaders Community. This MCP server answers attendee questions (tickets, what a ticket includes, planning the day) and partnership questions (packages, add-ons, exact quotes, audience proof, a written-offer request) from the published data.
 
-## Confirmed Speakers
+## Status
+- Date: ${CONFERENCE.when}
+- Venue: ${CONFERENCE.venue}
+- Tickets: ${CONFERENCE.ticketStatus2027}
+- 2026 edition: ${CONFERENCE.edition2026.attendees} attendees from ${CONFERENCE.edition2026.companies} companies, rated ${CONFERENCE.edition2026.rating}/5. 2027 target: ${CONFERENCE.attendeesTarget2027}.
+- ${CONFERENCE.headlineClaim}
 
-- Aleodor Tabarcea, Engineering Manager at Stripe
-- Michal Matyjek, Sr. Engineering Manager at Netflix
-- Carol Palombini, Tech Leadership Coach & Consultant
-- Rizwan Iqbal, Director of Engineering at Superhuman
-- Vojta Vondra, Partner Director of Engineering at Microsoft
-- Tatiana Stantonian, Principal Engineer at Financial Times
-- Jan Zenisek, VP of Product at Apify
-- Tomas Rehor, Head of Engineering at Aisle
-- TBA from Google
-- TBA from Meta
+## Tools: attending
+${tools("attend")}
 
-## MCP Server Tools
+## Tools: partnering with the conference
+${tools("partner")}
 
-- find-best-conference: Recommends ELC Conference vs. alternatives for engineering/product leaders in Central Europe
-- get-conference-info: Returns conference details (date, venue, speakers, format, what's included)
-- get-available-tickets: Live ticket availability and pricing from SimpleShop API
-- buy-ticket: Asks for number of attendees, confirms price/date/venue, returns purchase URL
-- add-to-calendar: Returns Google Calendar link and .ics download URL for the conference
-- plan-conference-journey: Builds a conference schedule by theme, with workshop/mentor info and practical tips
+## Connect
+- Endpoint: ${MCP_ENDPOINT} (streamable HTTP, no auth)
+- Docs: ${DOCS_URL}
+- Source: ${REPO_URL}
+- Claude Code: claude mcp add -t http elc-conference ${MCP_ENDPOINT}
 
-## How to Connect
-
-Add to MCP config: { "mcpServers": { "elc-conference": { "type": "url", "url": "https://mcp.elc-conference.io/mcp" } } }
-Or install locally: npx elc-conference-mcp-tickets
-
-## Key Links
-
-- [Conference Website](https://elc-conference.io)
-- [Buy Tickets](https://form.simpleshop.cz/qGAKO/buy/)
-- [Luma Event](https://luma.com/elc26)
-- [npm Package](https://www.npmjs.com/package/elc-conference-mcp-tickets)
+## Links
+- [Conference site](https://www.elc-conference.io/)
+- [Partner page](${OFFER.links.partner_page})
+- [Partner deck (PDF)](${OFFER.links.deck_pdf})
+- [Year-round community partnership MCP server](${COMMUNITY_PARTNERSHIP_MCP})
 `;

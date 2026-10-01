@@ -1,3 +1,5 @@
+> **Historical (2026 edition).** Written for ELC Conference 2026. Current server, tools and data: [README.md](README.md). Nothing here is a 2027 fact.
+
 # ELC Conference MCP Server — Test Plan
 
 ## 1. Unit Tests (automated)

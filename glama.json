@@ -1,9 +1,19 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
-  "maintainers": ["mariankamenistak"],
-  "name": "ELC Conference MCP Tickets",
-  "description": "MCP server for browsing and buying ELC Conference 2026 engineering leadership tickets. Live pricing from SimpleShop API. First conference in Central Europe with AI-powered ticket purchasing.",
-  "repository": "https://github.com/mariankamenistak/elc-conference-mcp-tickets",
-  "homepage": "https://elc-conference.io",
-  "tags": ["conference", "tickets", "engineering-leadership", "mcp", "elc", "prague"]
+  "maintainers": [
+    "marian-kamenistak"
+  ],
+  "name": "ELC Conference 2027 MCP server",
+  "description": "ELC Conference 2027, the engineering leadership conference in Prague: tickets and what a ticket includes (live ticket status, team pack), planning the day, and partnering with the conference (packages, add-ons, exact quotes with discounts, audience proof, written-offer request). Remote server, no auth.",
+  "repository": "https://github.com/marian-kamenistak/elc-conference-mcp-tickets",
+  "homepage": "https://www.elc-conference.io/mcp",
+  "tags": [
+    "conference",
+    "tickets",
+    "partnership",
+    "engineering-leadership",
+    "prague",
+    "cee",
+    "events"
+  ]
 }

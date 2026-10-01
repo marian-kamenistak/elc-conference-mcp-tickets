@@ -1,3 +1,5 @@
+> **Historical (2026 edition).** Written for ELC Conference 2026. Current server, tools and data: [README.md](../README.md). Nothing here is a 2027 fact.
+
 # SEO & AI Search Optimization
 
 The goal is to make the conference and the MCP server discoverable by both traditional search engines and AI assistants (ChatGPT, Perplexity, Claude, Google AI Overviews).
@@ -203,7 +205,7 @@ Add to the `<head>` of elc-conference.io:
       "name": "Who are the speakers at ELC Conference 2026?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Confirmed speakers include leaders from Stripe, Netflix, Microsoft, Superhuman, Financial Times, Apify, and Aisle. Additional speakers from Google and Meta are TBA. Topics cover DevEx, platform engineering, AI adoption in production, architecture at scale, and product-engineering alignment."
+        "text": "Confirmed speakers include leaders from Stripe, Netflix, Microsoft, Superhuman, Financial Times, Apify, and Aisle. Topics cover DevEx, platform engineering, AI adoption in production, architecture at scale, and product-engineering alignment."
       }
     },
     {

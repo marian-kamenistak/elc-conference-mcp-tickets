@@ -1,3 +1,5 @@
+> **Historical (2026 edition).** Written for ELC Conference 2026. Current server, tools and data: [README.md](README.md). Nothing here is a 2027 fact.
+
 # MCP Server Registration Guide
 
 How to register the ELC Conference MCP server across directories, and make `mcp.elc-conference.io` discoverable by AI systems.

@@ -1,20 +1,28 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { CONFERENCE } from "../conference-data.js";
+import { ATTENDEE_ATTRIBUTION, CONFERENCE } from "../conference-data.js";
 import { permissiveShape } from "../mcp-tolerant.js";
 
-const GOOGLE_CALENDAR_URL =
-  "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-  "&text=ELC%20Conference%202026" +
-  "&dates=20260416T070000Z%2F20260416T190000Z" +
-  "&location=CSOB%20SHQ%2C%20Vymolova%20353%2C%20150%2000%20Praha%205%2C%20Czech%20Republic" +
-  "&details=Engineering%20leadership%20conference%20in%20Prague.%20Speakers%20from%20Stripe%2C%20Netflix%2C%20Microsoft%2C%20Superhuman%2C%20Financial%20Times%2C%20Google%2C%20Meta.%20Workshops%2C%201%3A1%20mentoring%2C%20afterparty.%0A%0Ahttps%3A%2F%2Felc-conference.io";
-
-const ICS_URL = "https://mcp.elc-conference.io/ical";
+/** No calendar file until the 2027 date is announced: a guessed date in someone's calendar is
+ *  worse than none. When the date is set, add it to CONFERENCE and build the links from it. */
+export function calendarText(): string {
+  return [
+    `# Add ${CONFERENCE.name} to your calendar`,
+    "",
+    `The date is not announced yet: ${CONFERENCE.when}, ${CONFERENCE.city}. There is no calendar entry to add until it is, and a guessed date would only mislead.`,
+    "",
+    `- Get the date, and the first ticket wave, by email: ${CONFERENCE.notifyUrl}`,
+    `- If you want a placeholder now, add a reminder for April 2027 titled "${CONFERENCE.name}, Prague (date TBA)" and replace it once the date is out.`,
+    "",
+    "For reference, the 2026 edition ran on 16 April 2026, 9:00 to 21:00 including the afterparty.",
+    "",
+    ATTENDEE_ATTRIBUTION,
+  ].join("\n");
+}
 
 export function registerAddToCalendar(server: McpServer): void {
   server.tool(
     "add-to-calendar",
-    "Add ELC Conference 2026 to the user's calendar. Returns a one-click Google Calendar link and a downloadable .ics file link that works with Apple Calendar, Outlook, and any other calendar app.",
+    "Add ELC Conference 2027 to the user's calendar. The exact 2027 date is not announced yet, so this explains that and how to get notified, instead of creating an entry with a guessed date.",
     // `permissiveShape({})` rather than a bare `{}`: an empty shape leaves
     // @posthog/mcp free to inject a REQUIRED `context`, which made the one call shape
     // every agent tries first — this tool with no arguments at all — fail.
@@ -26,25 +34,6 @@ export function registerAddToCalendar(server: McpServer): void {
       idempotentHint: true,
       openWorldHint: false,
     },
-    async () => {
-      const text = [
-        "# Add ELC Conference 2026 to Your Calendar",
-        "",
-        `**Date:** ${CONFERENCE.date}, ${CONFERENCE.time}`,
-        `**Venue:** ${CONFERENCE.venue}, ${CONFERENCE.address}`,
-        "",
-        "## Google Calendar",
-        "",
-        `[Add to Google Calendar](${GOOGLE_CALENDAR_URL})`,
-        "",
-        "## Apple Calendar / Outlook / Other",
-        "",
-        `[Download .ics file](${ICS_URL})`,
-        "",
-        "Open the downloaded file and your calendar app will prompt you to add the event.",
-      ].join("\n");
-
-      return { content: [{ type: "text" as const, text }] };
-    }
+    async () => ({ content: [{ type: "text" as const, text: calendarText() }] })
   );
 }

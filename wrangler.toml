@@ -1,12 +1,37 @@
 name = "elc-conference-mcp"
 main = "src/worker.ts"
 compatibility_date = "2025-01-01"
-compatibility_flags = ["nodejs_compat"]
+# global_fetch_strictly_public: request_partnership_offer POSTs to
+# www.elc-conference.io/partner/api/offer, a path on THIS zone. Without the flag a same-zone
+# subrequest skips every Worker on the zone and goes straight to the Wix origin, so it could
+# never reach the offer API (served by elc-conference-ai).
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 
+# One server, three doors (2026-10-01):
+#  - mcp.elc-conference.io: the endpoint to install (custom domain, the whole host).
+#  - elc-conference.io/mcp* and www.elc-conference.io/mcp*: more specific than elc-conference-ai's
+#    /* catch-all (the Wix pass-through), so they win. Cloudflare's WebMCP bridge
+#    (/.webmcp/bridge.js, pack mcp-server-client) and the site's api-catalog read /mcp and
+#    /mcp/info same-origin from here. These routes belonged to elc-conference-partner-mcp until
+#    it was merged into this server. Do not widen them.
 routes = [
-  { pattern = "mcp.elc-conference.io", custom_domain = true }
+  { pattern = "mcp.elc-conference.io", custom_domain = true },
+  { pattern = "elc-conference.io/mcp*", zone_name = "elc-conference.io" },
+  { pattern = "www.elc-conference.io/mcp*", zone_name = "elc-conference.io" },
 ]
 
 [[kv_namespaces]]
 binding = "MCP_SESSIONS"
 id = "f459fd36614740fcbe313953349d7776"
+
+# request_partnership_offer only; the read-only tools stay open. Account-scoped ids:
+# elc-partnership-builder 2001/2002, another Worker 3001/3002, this one 4001
+# (moved here with the partnership tools).
+[[unsafe.bindings]]
+name = "OFFER_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "4001"
+simple = { limit = 5, period = 60 }
+
+[observability]
+enabled = true

@@ -1,14 +1,15 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { CONFERENCE } from "../conference-data.js";
+import { ATTENDEE_ATTRIBUTION, CONFERENCE, INVOICE_CONTACT } from "../conference-data.js";
+import { SimpleShopClient } from "../simpleshop-client.js";
+import { lookupTickets, type TicketLookup } from "../tickets.js";
+import { reference2026Lines } from "./get-available-tickets.js";
 import {
   ignoredNotice,
   parseArgs,
   permissiveShape,
   type ParseResult,
 } from "../mcp-tolerant.js";
-
-const BUY_URL = "https://form.simpleshop.cz/qGAKO/buy/";
 
 /* The real argument contract. `server.tool` advertises `permissiveShape(BUY_TICKET_SHAPE)` —
  * the field optional, the number widened to accept `"2"` as well as 2 — and the handler
@@ -33,78 +34,61 @@ function guidance(parsed: Extract<ParseResult<unknown>, { ok: false }>) {
   return parsed.probe ? result : { ...result, isError: true as const };
 }
 
+export function buyTicketText(quantity: number, r: TicketLookup, discountCode: string | null): string {
+  const team = quantity >= 5;
+  const lines: string[] = [`# ${CONFERENCE.name}: tickets for ${quantity} ${quantity === 1 ? "person" : "people"}`, ""];
+  if (r.state === "on_sale") {
+    const available = r.tickets.filter((t) => t.status === "available");
+    lines.push("## On sale now (live from the ticket shop)");
+    lines.push(...(available.length ? available.map((t) => `- ${t.name}: ${t.priceCZK.toLocaleString("en-US")} CZK (about €${t.priceEUR})${t.remaining !== null ? `, ${t.remaining} left` : ""}`) : ["- Every ticket type is sold out right now."]));
+    if (team) lines.push("", "For 5 or more people, look for a team pack in the list above: in 2026 it was 5 tickets for the price of 4.");
+    if (discountCode) lines.push("", `Discount code: \`${discountCode}\` (enter it at checkout).`);
+    lines.push("", `Buy: ${r.url}`, "Payment: card or bank transfer.");
+  } else {
+    lines.push(
+      r.state === "not_on_sale"
+        ? CONFERENCE.ticketStatus2027
+        : `Could not check the ticket shop just now (${r.reason}). As of the last published information, 2027 tickets are not on sale yet. Notify list: ${CONFERENCE.notifyUrl}`,
+      "",
+      `Nothing can be bought yet, so there is no purchase link. Join the notify list (${CONFERENCE.notifyUrl}) to hear when the first, cheapest wave opens.`,
+    );
+    if (team) lines.push("", `For a group of ${quantity}: in 2026 the Team Pack gave 5 tickets for the price of 4. Ask about a team deal when tickets open.`);
+    lines.push("", ...reference2026Lines());
+  }
+  lines.push(
+    "",
+    `Invoice payment or changes to ticket details: ${INVOICE_CONTACT}.`,
+    `When: ${CONFERENCE.when}. Where: ${CONFERENCE.city}.`,
+    "",
+    "What a ticket includes: `get-attendee-perks`.",
+    "",
+    ATTENDEE_ATTRIBUTION,
+  );
+  return lines.join("\n");
+}
+
 export function registerBuyTicket(
   server: McpServer,
+  client: SimpleShopClient | null,
   discountCode: string | null
 ): void {
   server.tool(
     "buy-ticket",
-    "Get a direct purchase link for ELC Conference 2026 tickets. IMPORTANT: Before calling this tool, always ask the user how many people they are buying tickets for. Use that number as the 'quantity' argument. The tool returns an order summary with price, date, venue, and purchase URL.",
+    "Buy ELC Conference 2027 tickets: returns the live purchase link when tickets are on sale, otherwise says plainly that they are not on sale yet and gives the notify list, with the team pack (5 for the price of 4 in 2026) for groups of 5+. IMPORTANT: before calling, ask the user how many people the tickets are for and pass that as 'quantity'.",
     permissiveShape(BUY_TICKET_SHAPE),
     {
       title: "Buy Ticket",
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,
-      openWorldHint: false,
+      openWorldHint: true,
     },
     async (raw) => {
       const parsed = parseArgs("buy-ticket", BUY_TICKET_SHAPE, raw);
       if (!parsed.ok) return guidance(parsed);
-      const { quantity } = parsed.data;
-
-      const isTeamPack = quantity >= 5;
-
-      const lines: string[] = [];
-
-      lines.push("# Order Summary — ELC Conference 2026");
-      lines.push("");
-
-      if (isTeamPack) {
-        lines.push(`**Tickets:** Team Pack (4+1 Free) — best value for ${quantity} people`);
-        lines.push("**Price:** 49,375 CZK (~1,960 EUR) for 5 tickets (~392 EUR/person)");
-        lines.push("**Availability:** 1 Team Pack remaining");
-      } else {
-        const totalCzk = (12973 * quantity).toLocaleString("cs-CZ");
-        const totalEur = 515 * quantity;
-        lines.push(`**Tickets:** ${quantity}× Individual — 3rd Wave Senior Leader`);
-        if (quantity > 1) {
-          lines.push(`**Price:** 12,973 CZK (~515 EUR) per ticket — total ~${totalCzk} CZK (~${totalEur} EUR)`);
-        } else {
-          lines.push("**Price:** 12,973 CZK (~515 EUR)");
-        }
-        lines.push("**Availability:** 15 individual tickets remaining");
-      }
-
-      lines.push("");
-      lines.push("---");
-      lines.push("");
-      lines.push(`**Date:** ${CONFERENCE.date}, ${CONFERENCE.time}`);
-      lines.push(`**Venue:** ${CONFERENCE.venue}, ${CONFERENCE.address}`);
-      lines.push(`**Getting there:** ${CONFERENCE.transit}`);
-      lines.push("**Included:** Main stage talks, 16 workshops, 1:1 mentoring, afterparty & networking");
-      lines.push("");
-      lines.push("---");
-      lines.push("");
-
-      if (discountCode) {
-        lines.push(`**Discount code:** \`${discountCode}\` — enter this at checkout`);
-        lines.push("");
-      }
-
-      lines.push(`**Purchase link:** ${BUY_URL}`);
-      lines.push("");
-      lines.push("Payment methods: card or bank transfer.");
-
+      const text = buyTicketText(parsed.data.quantity, await lookupTickets(client), discountCode);
       return {
-        content: [
-          {
-            type: "text" as const,
-            text:
-              lines.join("\n") +
-              ignoredNotice("buy-ticket", parsed.ignored, BUY_TICKET_SHAPE),
-          },
-        ],
+        content: [{ type: "text" as const, text: text + ignoredNotice("buy-ticket", parsed.ignored, BUY_TICKET_SHAPE) }],
       };
     }
   );

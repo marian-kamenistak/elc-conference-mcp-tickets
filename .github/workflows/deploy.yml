@@ -31,11 +31,15 @@ jobs:
       - name: Test
         run: npm test
 
-      # This repo's own `build` script excludes src/worker.ts from tsc (it's bundled
-      # directly by wrangler, not via dist/), so `npm run type-check` wouldn't check it.
-      # Bare `tsc --noEmit` (no exclude override) covers the whole src/ tree.
+      # worker-configuration.d.ts (Workers runtime types) is gitignored; generate it. Purely
+      # local: reads wrangler.toml, no Cloudflare API call.
+      - name: Generate Cloudflare Workers runtime types
+        run: npm run cf-typegen
+
+      # tsconfig.json excludes src/worker.ts from the npm build; tsconfig.worker.json checks
+      # the whole src/ tree including the Worker entry.
       - name: Type check
-        run: npx tsc --noEmit
+        run: npm run type-check
 
       - name: Install 1Password CLI
         if: hashFiles('.op-secrets') != ''
@@ -79,8 +83,13 @@ jobs:
           # Durable Object), so it never issues an mcp-session-id and doesn't need one on
           # tools/list — unlike the other four MCP servers here.
           resp=$(curl -sf -X POST "https://mcp.elc-conference.io/mcp" \
-            -H 'content-type: application/json' \
+            -H 'content-type: application/json' -H 'user-agent: deploy-verify' \
             -H 'accept: application/json, text/event-stream' \
             -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}')
           echo "$resp" | grep -q '"get-started"' || { echo "::error::tools/list missing get-started"; exit 1; }
+          echo "$resp" | grep -q '"quote_partnership"' || { echo "::error::tools/list missing quote_partnership"; exit 1; }
+          echo "$resp" | grep -q '"get-attendee-perks"' || { echo "::error::tools/list missing get-attendee-perks"; exit 1; }
+          # The same Worker serves the conference site's /mcp (docs page) and /mcp/info.
+          curl -sf -o /dev/null "https://www.elc-conference.io/mcp" || { echo "::error::www /mcp docs page down"; exit 1; }
+          curl -sf "https://www.elc-conference.io/mcp/info" | grep -q '"quote_partnership"' || { echo "::error::/mcp/info missing tools"; exit 1; }
           echo "smoke check passed"

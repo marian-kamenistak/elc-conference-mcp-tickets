@@ -37,34 +37,6 @@ export interface Ticket {
   status: "available" | "sold_out";
 }
 
-// Conference data
-
-export interface Speaker {
-  name: string;
-  title: string;
-  company: string;
-}
-
-export interface ConferenceInfo {
-  name: string;
-  date: string;
-  time: string;
-  venue: string;
-  address: string;
-  transit: string;
-  website: string;
-  lumaUrl: string;
-  ticketsUrl: string;
-  capacity: string;
-  format: string;
-  tagline: string;
-  audience: string;
-  speakers: Speaker[];
-  topics: string[];
-  whatsIncluded: string;
-  edition2025Summary: string;
-}
-
 // Cloudflare Worker env bindings
 
 export interface Env {
@@ -72,4 +44,7 @@ export interface Env {
   SIMPLESHOP_API_KEY?: string;
   DISCOUNT_CODE?: string;
   MCP_SESSIONS?: import("./mcp-usage.js").McpSessionsKv;
+  SLACK_BOT_TOKEN_ELC?: string;
+  MCP_USAGE_SLACK_CHANNEL?: string;
+  OFFER_RATE_LIMITER?: { limit(opts: { key: string }): Promise<{ success: boolean }> };
 }

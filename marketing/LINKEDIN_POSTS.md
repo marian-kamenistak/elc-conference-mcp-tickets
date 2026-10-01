@@ -1,3 +1,5 @@
+> **Historical (2026 edition).** Written for ELC Conference 2026. Current server, tools and data: [README.md](../README.md). Nothing here is a 2027 fact.
+
 # LinkedIn Campaign — ELC Conference MCP Server
 
 **Angle:** "First conference in Central Europe where you buy tickets by talking to AI."
@@ -144,7 +146,6 @@ This year we expanded to 350-400 seats. But we also expanded the speaker lineup:
 - Microsoft (Partner Director of Engineering)
 - Superhuman (Director of Engineering)
 - Financial Times (Principal Engineer)
-- Google (TBA)
 - Meta (TBA)
 - + more
 

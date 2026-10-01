@@ -1,11 +1,47 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SimpleShopClient } from "../simpleshop-client.js";
-import type { Ticket } from "../types.js";
+import { ATTENDEE_ATTRIBUTION, CONFERENCE, TICKETS_2026, czkToEur } from "../conference-data.js";
 import { permissiveShape } from "../mcp-tolerant.js";
+import { lookupTickets, type TicketLookup } from "../tickets.js";
 
-const CZK_TO_EUR = 25.2;
-const BUY_URL = "https://form.simpleshop.cz/qGAKO/buy/";
-const PRODUCT_CODE = "qGAKO"; // ELC Conference 2026 form code
+export function reference2026Lines(): string[] {
+  const s = TICKETS_2026.single;
+  const p = TICKETS_2026.teamPack;
+  return [
+    "## For reference: 2026 prices (not 2027)",
+    `- Single ticket, ${s.name}: ${s.czk.toLocaleString("en-US")} CZK (about €${czkToEur(s.czk)}). Earlier waves were cheaper.`,
+    `- ${p.name}: ${p.czk.toLocaleString("en-US")} CZK (about €${czkToEur(p.czk).toLocaleString("en-US")}) for ${p.tickets} people, so 5 tickets for the price of 4.`,
+  ];
+}
+
+export function ticketsText(r: TicketLookup): string {
+  const lines: string[] = [`# ${CONFERENCE.name}: tickets`, "", `When: ${CONFERENCE.when}. Where: ${CONFERENCE.city}.`, ""];
+  if (r.state === "on_sale") {
+    const available = r.tickets.filter((t) => t.status === "available");
+    const soldOut = r.tickets.filter((t) => t.status === "sold_out");
+    if (available.length) {
+      lines.push("## Available now (live from the ticket shop)");
+      for (const t of available) {
+        lines.push(`- ${t.name}: ${t.priceCZK.toLocaleString("en-US")} CZK (about €${t.priceEUR})${t.remaining !== null ? `, ${t.remaining} left` : ""}`);
+      }
+      lines.push("");
+    }
+    if (soldOut.length) {
+      lines.push("## Sold out", ...soldOut.map((t) => `- ${t.name}`), "");
+    }
+    lines.push(`Buy: ${r.url}`);
+  } else {
+    lines.push(
+      r.state === "not_on_sale"
+        ? CONFERENCE.ticketStatus2027
+        : `Could not check the ticket shop just now (${r.reason}). As of the last published information, ${CONFERENCE.ticketStatus2027.charAt(0).toLowerCase()}${CONFERENCE.ticketStatus2027.slice(1)}`,
+      "",
+      ...reference2026Lines(),
+    );
+  }
+  lines.push("", "What a ticket includes: `get-attendee-perks`.", "", ATTENDEE_ATTRIBUTION);
+  return lines.join("\n");
+}
 
 export function registerGetAvailableTickets(
   server: McpServer,
@@ -13,7 +49,7 @@ export function registerGetAvailableTickets(
 ): void {
   server.tool(
     "get-available-tickets",
-    "Get live ticket availability and pricing for ELC Conference 2026. Shows ticket tiers, prices in CZK and EUR, remaining count, and a direct purchase link.",
+    "Ticket status and prices for ELC Conference 2027 in Prague, checked live against the ticket shop. While 2027 tickets are not on sale it says so, links the notify list and shows 2026 prices clearly labelled as 2026. Never quote a 2027 price this tool did not return.",
     // `permissiveShape({})` rather than a bare `{}`: an empty shape leaves
     // @posthog/mcp free to inject a REQUIRED `context`, which made the one call shape
     // every agent tries first — this tool with no arguments at all — fail.
@@ -25,106 +61,6 @@ export function registerGetAvailableTickets(
       idempotentHint: true,
       openWorldHint: true,
     },
-    async () => {
-      if (!client) {
-        return {
-          content: [{ type: "text" as const, text: getStaticTicketInfo() }],
-        };
-      }
-
-      try {
-        const products = await client.listProducts();
-
-        // Find the active 2026 conference product by form code
-        const conference = products.find(
-          (p) => p.code === PRODUCT_CODE && !p.archived
-        );
-
-        if (!conference) {
-          return {
-            content: [
-              {
-                type: "text" as const,
-                text: `Conference product not found in SimpleShop. Check directly: ${BUY_URL}`,
-              },
-            ],
-          };
-        }
-
-        const tickets: Ticket[] = conference.variants.map((v) => {
-          const priceCZK = Math.round(parseFloat(v.price));
-          // API returns quantity as string "0" for sold-out, number for available
-          const remaining =
-            v.quantity === null ? null : Number(v.quantity);
-          return {
-            name: v.name,
-            priceCZK,
-            priceEUR: Math.round(priceCZK / CZK_TO_EUR),
-            remaining,
-            status:
-              (remaining === 0 ? "sold_out" : "available") as Ticket["status"],
-          };
-        });
-
-        const available = tickets.filter((t) => t.status === "available");
-        const soldOut = tickets.filter((t) => t.status === "sold_out");
-
-        const lines: string[] = ["# ELC Conference 2026 — Tickets", ""];
-
-        if (available.length > 0) {
-          lines.push("## Available");
-          for (const t of available) {
-            const remaining =
-              t.remaining !== null ? `${t.remaining} remaining` : "Available";
-            lines.push(
-              `- ${t.name}: ${t.priceCZK.toLocaleString()} CZK (~${t.priceEUR} EUR) — ${remaining}`
-            );
-          }
-          lines.push("");
-        }
-
-        if (soldOut.length > 0) {
-          lines.push("## Sold Out");
-          for (const t of soldOut) {
-            lines.push(`- ~~${t.name}~~: SOLD OUT`);
-          }
-          lines.push("");
-        }
-
-        lines.push(`Buy now: ${BUY_URL}`);
-
-        return { content: [{ type: "text" as const, text: lines.join("\n") }] };
-      } catch (error) {
-        const msg = error instanceof Error ? error.message : String(error);
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: `Failed to fetch live ticket data: ${msg}\n\nCheck availability directly: ${BUY_URL}`,
-            },
-          ],
-        };
-      }
-    }
+    async () => ({ content: [{ type: "text" as const, text: ticketsText(await lookupTickets(client)) }] })
   );
-}
-
-function getStaticTicketInfo(): string {
-  return [
-    "# ELC Conference 2026 — Tickets",
-    "",
-    "## Available",
-    "- 3rd Wave – Senior Leader: 12,973 CZK (~515 EUR) — 16 remaining",
-    "- 3rd Wave – Senior Leader Team Pack (4+1 Free): 49,375 CZK (~1,960 EUR) — 1 remaining",
-    "",
-    "## Sold Out",
-    "- ~~1st Wave – Early Adopter~~: SOLD OUT",
-    "- ~~2nd Wave – The Leader~~: SOLD OUT",
-    "- ~~1st Wave – Early Team Pack (4+1 Free)~~: SOLD OUT",
-    "- ~~2nd Wave – Leader Team Pack (4+1 Free)~~: SOLD OUT",
-    "",
-    "Note: This is cached data. Live data requires SimpleShop API credentials.",
-    "",
-    `Buy now: ${BUY_URL}`,
-  ].join("\n");
 }

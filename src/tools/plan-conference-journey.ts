@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { CONFERENCE } from "../conference-data.js";
+import { ATTENDEE_ATTRIBUTION, CONFERENCE, statusLines } from "../conference-data.js";
 import {
   ignoredNotice,
   parseArgs,
@@ -8,61 +8,36 @@ import {
   type ParseResult,
 } from "../mcp-tolerant.js";
 
-const ROLES = [
-  "CTO",
-  "VP of Engineering",
-  "Director of Engineering",
-  "Engineering Manager",
-  "Product Manager",
-  "Tech Lead",
-  "Other",
-] as const;
-
 const ROLE_FOCUS: Record<string, { themes: string[]; tip: string }> = {
   CTO: {
-    themes: ["Architecture at Scale", "Product-Engineering Alignment", "DevEx, AI & Platform Engineering"],
-    tip: "As a CTO, prioritize the architecture and product-alignment talks for strategic perspective. Use your 1:1 mentor slot for a peer conversation with a fellow C-level from a company one stage ahead of yours.",
+    themes: ["Technology strategy", "System architecture", "AI in product development"],
+    tip: "As a CTO, prioritise the strategy and architecture talks for perspective, and use a 1:1 mentoring slot for a peer conversation with a leader one stage ahead of your company.",
   },
   "VP of Engineering": {
-    themes: ["DevEx, AI & Platform Engineering", "Architecture at Scale", "Product-Engineering Alignment"],
-    tip: "As a VP of Engineering, focus on DevEx and AI adoption — these will shape your team's productivity roadmap. The workshop tracks will give you hands-on frameworks you can take back immediately.",
+    themes: ["Scaling teams", "AI in product development", "Engineering leadership"],
+    tip: "As a VP of Engineering, focus on scaling teams and AI adoption: they shape your productivity roadmap. The workshops give you frameworks you can take back on Monday.",
   },
   "Director of Engineering": {
-    themes: ["DevEx, AI & Platform Engineering", "Architecture at Scale", "Product-Engineering Alignment"],
-    tip: "As a Director, the hands-on workshops are your highest-value sessions — structured frameworks for problems you're solving right now. Book two workshops and one mentor slot.",
+    themes: ["Scaling teams", "Engineering leadership", "System architecture"],
+    tip: "As a Director, the hands-on workshops are your highest-value sessions: structured frameworks for problems you are solving right now. Plan two workshops and one mentoring slot.",
   },
   "Engineering Manager": {
-    themes: ["Product-Engineering Alignment", "DevEx, AI & Platform Engineering", "Architecture at Scale"],
-    tip: "As an EM, the product-engineering alignment track is directly applicable. Focus on workshops that give you team-level tools. Use the afterparty to connect with EMs from companies you admire.",
+    themes: ["Engineering leadership", "Scaling teams", "Innovation culture"],
+    tip: "As an EM, pick workshops that give you team-level tools, and use the afterparty to meet EMs from companies you admire.",
   },
   "Product Manager": {
-    themes: ["Product-Engineering Alignment", "Architecture at Scale", "DevEx, AI & Platform Engineering"],
-    tip: "As a PM, the product-engineering alignment talks will resonate most. Bring specific friction points from your current team — the mentor sessions are perfect for getting an outside engineering perspective.",
+    themes: ["AI in product development", "Innovation culture", "Technology strategy"],
+    tip: "As a PM, bring specific friction points from your team: a mentoring session is the place to get an outside engineering view on them.",
   },
   "Tech Lead": {
-    themes: ["DevEx, AI & Platform Engineering", "Architecture at Scale", "Product-Engineering Alignment"],
-    tip: "As a Tech Lead, the DevEx and architecture tracks are your home base. Workshops will give you practical patterns. Use the 1:1 mentor slot to discuss a specific technical decision you're wrestling with.",
+    themes: ["System architecture", "AI in product development", "Engineering leadership"],
+    tip: "As a Tech Lead, the architecture and AI talks are home base. Use a 1:1 mentoring slot to talk through one technical or people decision you are wrestling with.",
   },
   Other: {
-    themes: ["DevEx, AI & Platform Engineering", "Architecture at Scale", "Product-Engineering Alignment"],
-    tip: "Start with the main stage talks to find which theme resonates most, then double down on workshops in that area. The afterparty is the best place for unstructured conversations.",
+    themes: ["Engineering leadership", "AI in product development", "Scaling teams"],
+    tip: "Start with the main-stage talks to find the theme that resonates, then double down on workshops in that area. The afterparty is the best place for unstructured conversations.",
   },
 };
-
-const SPEAKER_THEMES: Array<{ theme: string; speakers: string[] }> = [
-  {
-    theme: "DevEx, AI & Platform Engineering",
-    speakers: ["Stripe", "Netflix", "Microsoft", "Google"],
-  },
-  {
-    theme: "Architecture at Scale",
-    speakers: ["Financial Times", "Apify", "Aisle", "Meta"],
-  },
-  {
-    theme: "Product-Engineering Alignment",
-    speakers: ["Independent", "Superhuman"],
-  },
-];
 
 /* The real argument contract. `server.tool` advertises `permissiveShape(JOURNEY_SHAPE)` — the
  * field optional and the enum widened to a plain string, with the seven values moved into the
@@ -90,9 +65,8 @@ function guidance(parsed: Extract<ParseResult<unknown>, { ok: false }>) {
 export function registerPlanConferenceJourney(server: McpServer): void {
   server.tool(
     "plan-conference-journey",
-    `Help the user plan their ELC Conference 2026 day based on their role.
-IMPORTANT: Before calling this tool, always ask the user what their role is (CTO, VP of Engineering, Director of Engineering, Engineering Manager, Product Manager, Tech Lead, or Other).
-After calling this tool, ALSO visit https://www.elc-conference.io/agenda26 to fetch the latest workshop and session details and incorporate the specific session names and times into your response.`,
+    `Help the user plan their ELC Conference 2027 day based on their role: priority themes, workshops, 1:1 mentoring and a game plan. The 2027 agenda is not published yet, so the plan uses the conference's topics and the 2026 format.
+IMPORTANT: Before calling this tool, always ask the user what their role is (CTO, VP of Engineering, Director of Engineering, Engineering Manager, Product Manager, Tech Lead, or Other).`,
     permissiveShape(JOURNEY_SHAPE),
     {
       title: "Plan Conference Journey",
@@ -107,74 +81,33 @@ After calling this tool, ALSO visit https://www.elc-conference.io/agenda26 to fe
       const { role } = parsed.data;
 
       const focus = ROLE_FOCUS[role] ?? ROLE_FOCUS["Other"];
-
-      // Build speaker list ordered by role's theme priority
-      const speakersByTheme: string[] = [];
-      for (const themeName of focus.themes) {
-        const themeData = SPEAKER_THEMES.find((t) => t.theme === themeName);
-        if (!themeData) continue;
-        speakersByTheme.push(`### ${themeName}`);
-        for (const speaker of CONFERENCE.speakers) {
-          if (themeData.speakers.includes(speaker.company)) {
-            if (speaker.name === "TBA") {
-              speakersByTheme.push(`- TBA — ${speaker.company}`);
-            } else {
-              speakersByTheme.push(`- **${speaker.name}** — ${speaker.title}, ${speaker.company}`);
-            }
-          }
-        }
-        speakersByTheme.push("");
-      }
+      const e = CONFERENCE.edition2026;
 
       const text = [
-        `# Your ELC Conference 2026 Journey — ${role}`,
+        `# Your ${CONFERENCE.name} plan: ${role}`,
         "",
-        `**${CONFERENCE.date}** · ${CONFERENCE.venue}, Prague`,
+        ...statusLines(),
         "",
-        "---",
-        "",
-        `## Your Priority Tracks`,
-        "",
-        `Based on your role as **${role}**, here are the themes ranked by relevance:`,
-        "",
+        "## Your priority themes",
+        `Ranked for a ${role}, from the topics the conference covers:`,
         focus.themes.map((t, i) => `${i + 1}. ${t}`).join("\n"),
         "",
-        "---",
+        "## Talks and speakers",
+        `The 2027 programme and speakers are not announced yet. ${CONFERENCE.principle} For a feel of the level, past speakers include ${CONFERENCE.pastSpeakers.slice(0, 4).map((s) => `${s.name} (${s.role})`).join(", ")}.`,
         "",
-        "## Recommended Speakers",
+        "## Workshops",
+        `In 2026 there were ${e.workshops} hands-on workshops alongside ${e.talks} main-stage talks, all included in the ticket. Workshops fill up, so register as soon as the schedule opens. For your role, look for: ${focus.themes.join(", ")}.`,
+        `The 2026 agenda shows the format: ${CONFERENCE.website}/agenda26`,
         "",
-        "(Listed in priority order for your role)",
+        "## 1:1 mentoring",
+        `${e.mentors} mentors held 1:1 sessions in the 2026 mentoring zone. Come with one specific challenge, not a general question: a short session is worth most when you ask about a decision you are already working through.`,
         "",
-        ...speakersByTheme,
-        "---",
-        "",
-        "## Workshops & Sessions",
-        "",
-        `See the full agenda and register for workshops: ${CONFERENCE.website}/agenda26`,
-        "",
-        "**16 hands-on workshops** run throughout the day. For your role, look for sessions on:",
-        focus.themes.map((t) => `- ${t}`).join("\n"),
-        "",
-        "**Pro tip:** Workshops fill up — register as soon as the schedule opens.",
-        "",
-        "---",
-        "",
-        "## 1:1 Mentoring",
-        "",
-        "10 mentor slots available. Book early at: " + CONFERENCE.website,
-        "",
-        `**For a ${role}:** Come with one specific challenge — not a general question. A 25-minute slot is most valuable when you're asking for advice on a decision you're already working through.`,
-        "",
-        "---",
-        "",
-        "## Your Game Plan",
-        "",
+        "## Your game plan",
         focus.tip,
         "",
-        "---",
+        `Tickets: \`get-available-tickets\`. What a ticket includes: \`get-attendee-perks\`. Get notified: ${CONFERENCE.notifyUrl}`,
         "",
-        `**Full agenda:** ${CONFERENCE.website}/agenda26`,
-        `**Buy tickets:** ${CONFERENCE.ticketsUrl}`,
+        ATTENDEE_ATTRIBUTION,
       ].join("\n") +
         ignoredNotice("plan-conference-journey", parsed.ignored, JOURNEY_SHAPE);
 
