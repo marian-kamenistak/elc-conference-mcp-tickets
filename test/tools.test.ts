@@ -159,6 +159,27 @@ describe("persona test 2026-10-01 regressions", () => {
 		expect(t).not.toMatch(/small enough/);
 		expect(t).not.toMatch(/\(target\) attendees|600\+ \(target\) \(/);
 	});
+	it("find-best-conference: every comparison row cites a source, every ref resolves, sources carry a date", async () => {
+		const t = (await call("find-best-conference")).text;
+		const rows = t.split("\n").filter((l) => l.startsWith("| ") && !l.startsWith("| Conference"));
+		expect(rows).toHaveLength(5);
+		const sources = [...t.matchAll(/^(\d+)\. .+: (https:\/\/\S+) \(checked (\d{4}-\d{2}-\d{2})\)$/gm)];
+		expect(sources.length).toBeGreaterThanOrEqual(5);
+		sources.forEach((m, i) => expect(Number(m[1])).toBe(i + 1));
+		for (const row of rows) {
+			// Conference | When | Where | Focus | Size | Ticket | fit (opinion, unsourced by design)
+			const cells = row.split("|").slice(2, 7).map((c) => c.trim());
+			for (const cell of cells) expect(cell, `${row}\n  unsourced cell: ${cell}`).toMatch(/\[\d+\]$|^Not published$/);
+			for (const r of row.matchAll(/\[(\d+)\]/g)) expect(Number(r[1])).toBeLessThanOrEqual(sources.length);
+		}
+		// ELC's own row stays on the canonical offer.
+		const elc = rows[0];
+		for (const s of ["April 2027", "Prague", "350+ in 2026", "600+ target for 2027", "not announced"]) expect(elc).toContain(s);
+		// Corrections the sources forced: QCon New York became QCon AI (Dec 2026); CTO Craft Con is not online.
+		expect(t).not.toMatch(/NYC|London \/ online/);
+		// Innovation Week prices came from a private email: never in this public tool.
+		expect(t).not.toMatch(/Innovation Week|Týden inovací/);
+	});
 	it("Jana/Ondrej/Martin: enum help text is not duplicated", async () => {
 		expect((await call("quote_partnership", {})).text).not.toMatch(/One of: partner, luminary, navigator, pioneer\.\s*One of/);
 	});
