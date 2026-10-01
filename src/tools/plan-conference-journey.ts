@@ -1,6 +1,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { CONFERENCE } from "../conference-data.js";
+import {
+  ignoredNotice,
+  parseArgs,
+  permissiveShape,
+  type ParseResult,
+} from "../mcp-tolerant.js";
 
 const ROLES = [
   "CTO",
@@ -58,17 +64,36 @@ const SPEAKER_THEMES: Array<{ theme: string; speakers: string[] }> = [
   },
 ];
 
+/* The real argument contract. `server.tool` advertises `permissiveShape(JOURNEY_SHAPE)` — the
+ * field optional and the enum widened to a plain string, with the seven values moved into the
+ * description — and the handler enforces the shape below through `parseArgs`, which also maps
+ * a near-miss like `cto` or `vp_of_engineering` onto the real value. See
+ * `src/mcp-tolerant.ts` for why. */
+const JOURNEY_SHAPE = {
+  role: z
+    .enum(["CTO", "VP of Engineering", "Director of Engineering", "Engineering Manager", "Product Manager", "Tech Lead", "Other"])
+    .describe("The user's role — used to prioritize tracks, sessions, and workshops"),
+};
+
+/** Renders a `parseArgs` failure through the same `{ content: [text] }` envelope every other
+ *  answer here uses, so a caller never has to parse a second result shape.
+ *
+ *  `probe` is the difference between a caller asking what the tool wants and a caller getting
+ *  it wrong, and the two deserve different answers. A bare `{}` is a question and is answered
+ *  as a normal result carrying the field menu; arguments that were supplied and rejected stay
+ *  an error. */
+function guidance(parsed: Extract<ParseResult<unknown>, { ok: false }>) {
+  const result = { content: [{ type: "text" as const, text: parsed.message }] };
+  return parsed.probe ? result : { ...result, isError: true as const };
+}
+
 export function registerPlanConferenceJourney(server: McpServer): void {
   server.tool(
     "plan-conference-journey",
     `Help the user plan their ELC Conference 2026 day based on their role.
 IMPORTANT: Before calling this tool, always ask the user what their role is (CTO, VP of Engineering, Director of Engineering, Engineering Manager, Product Manager, Tech Lead, or Other).
 After calling this tool, ALSO visit https://www.elc-conference.io/agenda26 to fetch the latest workshop and session details and incorporate the specific session names and times into your response.`,
-    {
-      role: z
-        .enum(["CTO", "VP of Engineering", "Director of Engineering", "Engineering Manager", "Product Manager", "Tech Lead", "Other"])
-        .describe("The user's role — used to prioritize tracks, sessions, and workshops"),
-    },
+    permissiveShape(JOURNEY_SHAPE),
     {
       title: "Plan Conference Journey",
       readOnlyHint: true,
@@ -76,7 +101,11 @@ After calling this tool, ALSO visit https://www.elc-conference.io/agenda26 to fe
       idempotentHint: true,
       openWorldHint: true,
     },
-    async ({ role }) => {
+    async (raw) => {
+      const parsed = parseArgs("plan-conference-journey", JOURNEY_SHAPE, raw);
+      if (!parsed.ok) return guidance(parsed);
+      const { role } = parsed.data;
+
       const focus = ROLE_FOCUS[role] ?? ROLE_FOCUS["Other"];
 
       // Build speaker list ordered by role's theme priority
@@ -146,7 +175,8 @@ After calling this tool, ALSO visit https://www.elc-conference.io/agenda26 to fe
         "",
         `**Full agenda:** ${CONFERENCE.website}/agenda26`,
         `**Buy tickets:** ${CONFERENCE.ticketsUrl}`,
-      ].join("\n");
+      ].join("\n") +
+        ignoredNotice("plan-conference-journey", parsed.ignored, JOURNEY_SHAPE);
 
       return { content: [{ type: "text" as const, text }] };
     }

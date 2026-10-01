@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SimpleShopClient } from "../simpleshop-client.js";
 import type { Ticket } from "../types.js";
+import { permissiveShape } from "../mcp-tolerant.js";
 
 const CZK_TO_EUR = 25.2;
 const BUY_URL = "https://form.simpleshop.cz/qGAKO/buy/";
@@ -13,7 +14,10 @@ export function registerGetAvailableTickets(
   server.tool(
     "get-available-tickets",
     "Get live ticket availability and pricing for ELC Conference 2026. Shows ticket tiers, prices in CZK and EUR, remaining count, and a direct purchase link.",
-    {},
+    // `permissiveShape({})` rather than a bare `{}`: an empty shape leaves
+    // @posthog/mcp free to inject a REQUIRED `context`, which made the one call shape
+    // every agent tries first — this tool with no arguments at all — fail.
+    permissiveShape({}),
     {
       title: "Get Available Tickets",
       readOnlyHint: true,

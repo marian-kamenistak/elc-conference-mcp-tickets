@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { CONFERENCE } from "../conference-data.js";
+import { permissiveShape } from "../mcp-tolerant.js";
 
 const GOOGLE_CALENDAR_URL =
   "https://calendar.google.com/calendar/render?action=TEMPLATE" +
@@ -14,7 +15,10 @@ export function registerAddToCalendar(server: McpServer): void {
   server.tool(
     "add-to-calendar",
     "Add ELC Conference 2026 to the user's calendar. Returns a one-click Google Calendar link and a downloadable .ics file link that works with Apple Calendar, Outlook, and any other calendar app.",
-    {},
+    // `permissiveShape({})` rather than a bare `{}`: an empty shape leaves
+    // @posthog/mcp free to inject a REQUIRED `context`, which made the one call shape
+    // every agent tries first — this tool with no arguments at all — fail.
+    permissiveShape({}),
     {
       title: "Add to Calendar",
       readOnlyHint: true,

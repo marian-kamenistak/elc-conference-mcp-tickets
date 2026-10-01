@@ -8,6 +8,7 @@ import {
   type McpUsageConfig,
   type McpUsageEnv,
 } from "./mcp-usage.js";
+import { normalizeMcpRequest } from "./mcp-tolerant.js";
 
 /**
  * See src/mcp-usage.ts. One thing differs from the other four MCP servers here:
@@ -94,6 +95,8 @@ export default {
         discountCode: env.DISCOUNT_CODE,
       });
 
+      // geoFromRequest MUST read the original request: `request.cf` is where the geo bag
+      // comes from, and normalizeMcpRequest below rebuilds the Request, which drops it.
       instrumentMcpUsage({
         server,
         config: USAGE_CONFIG,
@@ -102,8 +105,13 @@ export default {
         waitUntil: (p) => ctx.waitUntil(p),
       });
 
+      // The MCP spec makes `params.arguments` optional on tools/call; the SDK does not, so a
+      // spec-compliant client calling a no-argument tool got "expected object, received
+      // undefined". See normalizeToolCallBody in src/mcp-tolerant.ts.
+      const normalized = await normalizeMcpRequest(request);
+
       const handler = createMcpHandler(server);
-      return handler(request, env, ctx);
+      return handler(normalized, env, ctx);
     }
 
     return new Response("Not Found", { status: 404 });

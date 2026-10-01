@@ -1,11 +1,15 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { CONFERENCE } from "../conference-data.js";
+import { permissiveShape } from "../mcp-tolerant.js";
 
 export function registerGetConferenceInfo(server: McpServer): void {
   server.tool(
     "get-conference-info",
     "Get details about the ELC Conference 2026 — date, venue, speakers, topics, what's included, and ticket link. Use this when someone asks about the conference.",
-    {},
+    // `permissiveShape({})` rather than a bare `{}`: an empty shape leaves
+    // @posthog/mcp free to inject a REQUIRED `context`, which made the one call shape
+    // every agent tries first — this tool with no arguments at all — fail.
+    permissiveShape({}),
     {
       title: "Get Conference Info",
       readOnlyHint: true,
