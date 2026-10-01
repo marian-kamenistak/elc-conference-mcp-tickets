@@ -6,8 +6,8 @@
 - Date: April 2027 (exact date to be announced)
 - Venue: to be announced
 - Tickets: Tickets for ELC Conference 2027 are not on sale yet and no 2027 price has been announced. Get notified when they open: https://www.elc-conference.io/subscribe
-- 2026 edition: 350+ attendees from 134 companies, rated 4.8/5. 2027 target: 600+ (target).
-- 8 in 10 people in the room lead AI agents, people or technology.
+- 2026 edition: 350+ attendees from 134 companies, rated 4.8/5. Attendance target 2027: 600+.
+- 8 in 10 people in the room lead AI agents, people or technology. (Basis: #ELC2025 attendee mix: engineering leadership 43.0% + senior ICs and tech leads 22.6% + founders and executives 16.6% = 82.2%.)
 
 ## Tools: attending
 - find-best-conference: Which conference should an engineering or product leader in Central Europe go to?
