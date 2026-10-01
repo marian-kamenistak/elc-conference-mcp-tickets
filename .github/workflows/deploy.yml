@@ -91,5 +91,7 @@ jobs:
           echo "$resp" | grep -q '"get-attendee-perks"' || { echo "::error::tools/list missing get-attendee-perks"; exit 1; }
           # The same Worker serves the conference site's /mcp (docs page) and /mcp/info.
           curl -sf -o /dev/null "https://www.elc-conference.io/mcp" || { echo "::error::www /mcp docs page down"; exit 1; }
-          curl -sf "https://www.elc-conference.io/mcp/info" | grep -q '"quote_partnership"' || { echo "::error::/mcp/info missing tools"; exit 1; }
+          # Capture first: `curl | grep -q` under pipefail fails on SIGPIPE when grep exits early.
+          info=$(curl -sf "https://www.elc-conference.io/mcp/info")
+          echo "$info" | grep -q '"quote_partnership"' || { echo "::error::/mcp/info missing tools"; exit 1; }
           echo "smoke check passed"
