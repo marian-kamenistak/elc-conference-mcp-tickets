@@ -97,7 +97,7 @@ export function registerPartnership(server: McpServer, opts: PartnershipOptions 
 		"list_addons",
 		{
 			title: "List add-ons",
-			description: `Add-ons for an ${OFFER.event.name} partnership: host the speakers' dinner, the afterparty, a closed leadership roundtable of engineering leaders, or a partner workshop. Each goes to one partner only and needs a package. Also returns the pricing rules (second add-on 25% off, 10% early-sign discount).`,
+			description: `Add-ons for an ${OFFER.event.name} partnership: category exclusivity (Luminary only: the only partner in your category and the Main Partner of the day), a closed leadership roundtable of engineering leaders, or a partner workshop. Each goes to one partner only and needs a package. The speakers' dinner and the afterparty are included in Luminary, not sold separately. Also returns the pricing rules (second add-on 25% off, 10% early-sign discount).`,
 			inputSchema: permissiveShape({}),
 			annotations: READ_ONLY,
 		},

@@ -46,7 +46,7 @@ export function conferenceInfoText(): string {
 export function registerGetConferenceInfo(server: McpServer): void {
   server.tool(
     "get-conference-info",
-    "Get details about ELC Conference 2027, the engineering leadership conference in Prague (April 2027, exact date to be announced): date and venue status, ticket status, format, audience, topics, past speakers, 2026 results and links. Use this when someone asks about the conference.",
+    "Get details about ELC Conference 2027, the engineering leadership conference in Prague (22 April 2027, venue to be announced): date and venue status, ticket status, format, audience, topics, past speakers, 2026 results and links. Use this when someone asks about the conference.",
     // `permissiveShape({})` rather than a bare `{}`: an empty shape leaves
     // @posthog/mcp free to inject a REQUIRED `context`, which made the one call shape
     // every agent tries first — this tool with no arguments at all — fail.

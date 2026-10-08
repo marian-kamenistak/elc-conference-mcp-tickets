@@ -63,10 +63,10 @@ describe("every tool answers a bare call in prose", () => {
 describe("2027 refresh: nothing invented, nothing stale", () => {
 	it("no invented 2027 date or venue, no 'TBA Google', no 2026 form link", async () => {
 		const all = (await Promise.all(TOOL_MENU.filter((t) => t.group === "attend").map((t) => call(t.name, t.name === "buy-ticket" ? { quantity: 2 } : t.name === "plan-conference-journey" ? { role: "CTO" } : {})))).map((r) => r.text).join("\n");
-		expect(all).toContain("April 2027 (exact date to be announced)");
+		expect(all).toContain("22 April 2027");
 		expect(all).not.toMatch(/TBA \(Google\)|TBA — Google|TBA from Google/);
 		expect(all).not.toContain("qGAKO");
-		expect(all).not.toMatch(/April \d{1,2}, 2027|\d{1,2} April 2027/);
+		expect(all).not.toMatch(/April \d{1,2}, 2027|\b(?!22 )\d{1,2} April 2027/); // only the announced day
 		expect(all).not.toMatch(/ELC Conference 2026 —|Your ELC Conference 2026/);
 	});
 	it("2026 prices only ever appear labelled as 2026", async () => {
@@ -146,7 +146,7 @@ describe("persona test 2026-10-01 regressions", () => {
 		expect(t).toMatch(/main-stage talk or the attendee list: neither is for sale/);
 	});
 	it("Martin: no package fits → the year-round server and tickets are offered", async () => {
-		const t = (await call("recommend_package", { goals: ["grow_leaders"], budget_eur: 20000 })).text;
+		const t = (await call("recommend_package", { goals: ["grow_leaders"], budget_eur: 4000 })).text;
 		expect(t).toContain("https://www.engineeringleaders.io/mcp/partnership");
 	});
 	it("Petra/Tomasz: team pack is never claimed as exact 5-for-4 arithmetic; a group of 6 gets a 2026 sum", async () => {
@@ -174,7 +174,7 @@ describe("persona test 2026-10-01 regressions", () => {
 		}
 		// ELC's own row stays on the canonical offer.
 		const elc = rows[0];
-		for (const s of ["April 2027", "Prague", "350+ in 2026", "600+ target for 2027", "not announced"]) expect(elc).toContain(s);
+		for (const s of ["22 April 2027", "Prague", "400+ in 2026", "500 target for 2027", "not announced"]) expect(elc).toContain(s);
 		// Corrections the sources forced: QCon New York became QCon AI (Dec 2026); CTO Craft Con is not online.
 		expect(t).not.toMatch(/NYC|London \/ online/);
 		// Innovation Week prices came from a private email: never in this public tool.
@@ -186,8 +186,8 @@ describe("persona test 2026-10-01 regressions", () => {
 	it("Richard: a sent offer restates the no-paid-stage and no-attendee-list rules", async () => {
 		const { requestOffer } = await import("../src/partner/request.js");
 		const ok = (async () => new Response('{"ok":true}', { status: 200 })) as unknown as typeof fetch;
-		const r = await requestOffer({ name: "R", email: "r@example.com", company: "X", package: "partner", message: "keynote or no deal" }, ok);
-		expect(r.text).toMatch(/A paid slot on the main stage does not exist/);
+		const r = await requestOffer({ name: "R", email: "r@example.com", company: "X", package: "luminary", message: "keynote or no deal" }, ok);
+		expect(r.text).toMatch(/A paid slot on the (ELC )?main stage does not exist/);
 		expect(r.text).toMatch(/does not share attendee lists/);
 		expect(r.text).not.toMatch(/Next step: `request_partnership_offer`/);
 	});

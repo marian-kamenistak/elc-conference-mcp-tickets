@@ -83,7 +83,7 @@ export function listPackagesMarkdown(): string {
 		`${OFFER.vat} Offer version ${OFFER.version}, updated ${OFFER.updated}.`,
 		"",
 		...OFFER.packages.map(packageMarkdown).flatMap((s) => [s, ""]),
-		`Add-ons (speakers' dinner, afterparty, leadership roundtable, partner workshop) come on top of a package — see \`list_addons\`. Exact totals with discounts: \`quote_partnership\`.`,
+		`Add-ons (category exclusivity for Luminary, leadership roundtable, partner workshop) come on top of a package — see \`list_addons\`. The speakers' dinner and the afterparty are not sold separately: Luminary hosts the dinner and names the afterparty. Exact totals with discounts: \`quote_partnership\`.`,
 		"",
 		ATTRIBUTION,
 	].join("\n");
@@ -220,6 +220,11 @@ export function quotePartnership(input: QuoteInput, today: string): QuoteResult 
 	if (unknown.length) {
 		return { ok: false, error: `Unknown add-on${unknown.length > 1 ? "s" : ""} ${unknown.map((u) => `\`${u}\``).join(", ")}. Valid ids: ${OFFER.addons.map((a) => a.id).join(", ")}.` };
 	}
+	// Category exclusivity is sold with Luminary only (offer v2027.3, Marian 2026-10-08).
+	const wrongPkg = addonIds.map((id) => findAddon(id)!).filter((a) => a.requires && a.requires !== pkg.id);
+	if (wrongPkg.length) {
+		return { ok: false, error: `${wrongPkg.map((a) => `\`${a.id}\``).join(", ")} is an add-on to the \`${wrongPkg[0].requires}\` package only, not to \`${pkg.id}\`.` };
+	}
 
 	let signDate = input.sign_date?.trim() || today;
 	let assumed = !input.sign_date?.trim();
@@ -330,10 +335,10 @@ export type Goal = (typeof GOALS)[number];
  *  inclusions (1 point). Add-on hints are fixed per goal and quoted with their own summaries. */
 const GOAL_RULES: Record<Goal, { label: string; bestFor: RegExp | null; includes: RegExp | null; addons: string[] }> = {
 	hiring: { label: "hiring engineers", bestFor: /hiring/i, includes: /ELC Jobs/i, addons: ["partner-workshop"] },
-	brand: { label: "brand / employer brand", bestFor: /brand|name on the day/i, includes: /booth|newsletter/i, addons: ["afterparty", "speakers-dinner"] },
-	grow_leaders: { label: "growing your own engineering leaders", bestFor: /growing your own leaders/i, includes: /mentoring sessions|workshop or mentor slot/i, addons: ["roundtable"] },
+	brand: { label: "brand / employer brand", bestFor: /brand|name on the day|partner of the day/i, includes: /booth|newsletter|afterparty/i, addons: ["category-exclusivity"] },
+	grow_leaders: { label: "growing your own engineering leaders", bestFor: /growing your own leaders/i, includes: /mentoring sessions|workshop or mentor slot/i, addons: ["category-exclusivity", "roundtable"] },
 	early_adopters: { label: "meeting early adopters (startups)", bestFor: /early adopters|startups/i, includes: null, addons: ["partner-workshop"] },
-	reach_executives: { label: "reaching CTOs, VPs and engineering directors", bestFor: null, includes: /speakers' dinner|direct access/i, addons: ["roundtable", "speakers-dinner"] },
+	reach_executives: { label: "reaching CTOs, VPs and engineering directors", bestFor: /meeting buyers/i, includes: /speakers' dinner|introductions by name/i, addons: ["roundtable"] },
 };
 
 export interface Recommendation {

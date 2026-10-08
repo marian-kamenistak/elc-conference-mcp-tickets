@@ -20,6 +20,8 @@ export interface Addon {
 	name: string;
 	price: number;
 	limit: number;
+	/** Package id this add-on needs (category exclusivity: luminary). Absent = any package. */
+	requires?: string;
 	summary: string;
 	includes: string[];
 }
@@ -29,7 +31,7 @@ export interface Offer {
 	updated: string;
 	currency: string;
 	vat: string;
-	event: { name: string; when: string; where: string; format: string; organiser: string; principle: string };
+	event: { name: string; when: string; date?: string; where: string; format: string; organiser: string; principle: string };
 	proof: {
 		attendees_2026: string;
 		attendees_target_2027: string;

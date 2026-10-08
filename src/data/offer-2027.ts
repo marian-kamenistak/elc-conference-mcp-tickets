@@ -2,21 +2,25 @@
 // Do not edit by hand: change the canonical JSON, then run `node scripts/sync-offer.mjs`.
 // Same data as https://www.elc-conference.io/partner/ (prices EUR, ex VAT).
 const OFFER_2027 = {
-	"version": "2027.1",
-	"updated": "2026-10-01",
+	"version": "2027.3",
+	"updated": "2026-10-08",
 	"currency": "EUR",
 	"vat": "Prices are ex VAT.",
 	"event": {
 		"name": "ELC Conference 2027",
-		"when": "April 2027 (exact date to be announced)",
+		"when": "22 April 2027",
 		"where": "Prague, Czech Republic",
 		"format": "One day: main-stage talks, hands-on workshops, a mentoring zone",
 		"organiser": "Engineering Leaders Community (ELC)",
-		"principle": "Speakers are picked for what they built. A paid slot on the main stage does not exist. Partners' speakers can apply through the call for speakers and go through the same selection."
+		"principle": "A paid slot on the ELC main stage does not exist. Every speaker wins the stage with their topic and their track record. Partners’ speakers apply through the call for speakers and go through the same selection.",
+		"expected_attendees_2027": "500",
+		"budget_fit": "Companies budget for two things ELC can serve: hiring and marketing. Every package names which one it is for, what happens before, during and after the day, and what the report after the day counts.",
+		"date": "2027-04-22",
+		"when_note": "Marian, 2026-10-08. Venue to be announced."
 	},
 	"proof": {
-		"attendees_2026": "350+",
-		"attendees_target_2027": "600+ (target)",
+		"attendees_2026": "400+",
+		"attendees_target_2027": "500 (target)",
 		"rating": "4.8",
 		"companies_2026": 134,
 		"programme_2026": {
@@ -43,7 +47,7 @@ const OFFER_2027 = {
 				"share": 43
 			},
 			{
-				"group": "Senior ICs and tech leads",
+				"group": "Senior engineers and tech leads",
 				"share": 22.6
 			},
 			{
@@ -145,53 +149,250 @@ const OFFER_2027 = {
 			}
 		],
 		"headline_claim": "8 in 10 people in the room lead AI agents, people or technology.",
-		"headline_claim_basis": "#ELC2025 attendee mix: engineering leadership 43.0% + senior ICs and tech leads 22.6% + founders and executives 16.6% = 82.2%."
-	},
-	"packages": [
-		{
-			"id": "partner",
-			"name": "Partner",
-			"price": 38000,
-			"seats": 2,
-			"tagline": "The first to sign is the main partner of the day.",
-			"best_for": [
-				"hiring",
-				"growing your own leaders",
-				"being the name on the day"
-			],
-			"includes": [
-				"A workshop or mentor slot for your leader; your speaker can apply for the main stage (same selection as everyone else)",
-				"14 tickets",
-				"10 mentoring sessions with Marian on technical leadership and AI",
-				"Direct access to 3,300+ community members",
-				"An ELC meetup for 100+ leaders in your office in February 2027",
-				"3 months of social posts and videos, a podcast episode",
-				"Booth in the Experience Zone and seats at the speakers' dinner on request",
-				"Listed on the website and partner boards"
+		"headline_claim_basis": "#ELC2025 attendee mix: engineering leadership 43.0% + senior engineers and tech leads 22.6% + founders and executives 16.6% = 82.2%.",
+		"attendee_roles": {
+			"base": 350,
+			"base_label": "ELC Conference 2026 attendees with a role on record",
+			"source": "Marian, 2026-10-02 (role split on a base of 350 attendees with a role on record); published attendance 2026 is 400+ (Marian, 2026-10-08)",
+			"segments": [
+				{
+					"name": "Engineering Leaders",
+					"pct": 37,
+					"count": 130,
+					"color": "#8A5BE0"
+				},
+				{
+					"name": "Senior AI Engineers",
+					"pct": 23,
+					"count": 81,
+					"color": "#1FA79F"
+				},
+				{
+					"name": "CTOs",
+					"pct": 17,
+					"count": 59,
+					"color": "#B9893A"
+				},
+				{
+					"name": "Other",
+					"pct": 23,
+					"count": 80,
+					"color": "#D46A9C"
+				}
 			]
 		},
+		"rating_year": 2025,
+		"rating_label": "attendee rating, 2025 edition",
+		"partner_results": {
+			"items": [
+				{
+					"company": "ČSOB",
+					"logo": "partner-csob.webp",
+					"year": 2026,
+					"bought": "Host partner: ELC Conference 2026 at ČSOB HQ",
+					"got": "400+ engineering leaders and 134 companies in its building for a day, its executive on the main stage, its logo on the main screen.",
+					"photo": "elc26-elck_37",
+					"photo_alt": "The atrium at ČSOB HQ, ELC Conference 2026",
+					"quote": null
+				},
+				{
+					"company": "Microsoft",
+					"logo": "partner-microsoft.webp",
+					"year": 2026,
+					"bought": "Navigator partner 2026",
+					"got": "Its Partner Director of Engineering won a main-stage slot through the call for speakers. Logo on the main screen, 5 tickets, a seat at the speakers’ dinner.",
+					"photo": "elc26-0039",
+					"photo_alt": "Partner logos on the main screen, 2026",
+					"quote": null
+				},
+				{
+					"company": "Make",
+					"logo": "partner-make.webp",
+					"year": 2026,
+					"bought": "Navigator partner 2026",
+					"got": "A booth in the Experience Zone staffed by its own engineers, all day in front of 400+ leaders. Logo on the main screen.",
+					"photo": "elc26-0213",
+					"photo_alt": "The make booth in the Experience Zone, 2026",
+					"quote": null
+				},
+				{
+					"company": "Apify",
+					"logo": "partner-apify.webp",
+					"year": 2026,
+					"bought": "Pioneer partner 2026 and 2025, ELC meetups at its office",
+					"got": "2 ELC meetups at its Prague office, the latest with 295 applications. Its VP of Product on the main stage in 2026.",
+					"photo": "elc25-ek_158",
+					"photo_alt": "Apify on the partner screen, 2025",
+					"quote": {
+						"text": "Bringing together 90% of the Czech and Slovak tech and product scene in one place? That had to be one hell of a job.",
+						"by": "Marek Trunkát, CTO at Apify"
+					}
+				},
+				{
+					"company": "Ataccama",
+					"logo": null,
+					"year": 2026,
+					"bought": "ELC community partner",
+					"got": "3 ELC meetups at its Prague HQ, 106 leaders checked in at the largest.",
+					"photo": null,
+					"photo_alt": null,
+					"quote": null
+				}
+			]
+		},
+		"goals": [
+			{
+				"id": "hire",
+				"legend": "Hire",
+				"budget": "hiring",
+				"title": "Hire engineers and engineering managers",
+				"text": "Partners hire 2.7 people a month from the ELC community. Apify had 295 applications to its latest ELC meetup; Ataccama had 106 leaders at its HQ meetup. Your open roles at the booth, on ELC Jobs and in the newsletter; your people meet candidates at the conference, the meetups and the speakers’ dinner.",
+				"short": "2.7 hires a month from the community. Apify: 295 applications to its latest ELC meetup. Your roles at the booth, on ELC Jobs, in the newsletter.",
+				"counts": "Applications on ELC Jobs, booth visits, introductions made.",
+				"fit": [
+					"Navigator",
+					"Luminary"
+				],
+				"photo": "elc26-0017",
+				"alt": "Networking at ELC Conference 2026"
+			},
+			{
+				"id": "sell",
+				"legend": "Sell",
+				"budget": "marketing",
+				"title": "Meet the people who buy engineering tools",
+				"text": "59 CTOs and 130 engineering leaders in one room. A booth, 5 introductions by name, the speakers’ dinner you host, a closed roundtable on your topic, and a partner workshop with the contacts of attendees who opt in.",
+				"short": "59 CTOs and 130 engineering leaders in one room. A booth, introductions by name, the dinner you host, a roundtable, a workshop with opt-in contacts.",
+				"counts": "Introductions made, opt-in contacts, roundtable guests, booth visits.",
+				"fit": [
+					"Luminary"
+				],
+				"addons": [
+					"roundtable",
+					"partner-workshop"
+				],
+				"photo": "elc26-0213",
+				"alt": "A partner booth in the Experience Zone"
+			},
+			{
+				"id": "grow",
+				"legend": "Grow",
+				"budget": "hiring",
+				"title": "Grow your own leaders",
+				"text": "10 tickets and a workshop or mentor slot for your leader. With category exclusivity: an ELC meetup for 100+ leaders in your office and 4 mentoring sessions with Marian.",
+				"short": "10 tickets, a workshop or mentor slot for your leader. With category exclusivity: a meetup in your office and 4 mentoring sessions with Marian.",
+				"counts": "Tickets used, sessions held, meetup check-ins.",
+				"fit": [
+					"Luminary"
+				],
+				"addons": [
+					"category-exclusivity"
+				],
+				"photo": "elc26-0250",
+				"alt": "The mentoring zone"
+			},
+			{
+				"id": "seen",
+				"legend": "Be seen",
+				"budget": "marketing",
+				"title": "Put your brand in front of engineering leaders",
+				"text": "Your name on the main screen and from the stage at the opening, the afterparty in your name, a dedicated newsletter to 2,900+ subscribers, media coverage and social posts.",
+				"short": "Main screen, named from the stage, the afterparty in your name, a dedicated newsletter to 2,900+, media coverage, social posts.",
+				"counts": "Newsletter opens and clicks, media mentions.",
+				"fit": [
+					"Luminary"
+				],
+				"photo": "elc26-0044",
+				"alt": "Partner logos on the main screen"
+			},
+			{
+				"id": "launch",
+				"legend": "Launch",
+				"budget": "marketing",
+				"title": "Meet early adopters for your product",
+				"text": "A spotlight in the newsletter and a partner workshop where you get the contacts of attendees who opt in.",
+				"short": "A newsletter spotlight and a partner workshop with the contacts of attendees who opt in.",
+				"counts": "Spotlight clicks, workshop registrations.",
+				"fit": [
+					"Pioneer"
+				],
+				"addons": [
+					"partner-workshop"
+				],
+				"photo": "elc26-0233",
+				"alt": "A partner workshop"
+			}
+		],
+		"funnel": {
+			"before": {
+				"title": "Before the day",
+				"when": "February and March 2027",
+				"items": [
+					"Your logo and your story in the newsletter, on the website and in every attendee email",
+					"Your open roles on ELC Jobs (Navigator and Luminary)",
+					"We agree the 5 people you want to meet (Luminary)",
+					"An ELC meetup for 100+ leaders in your office (Category exclusivity)"
+				]
+			},
+			"during": {
+				"title": "On the day",
+				"when": "22 April 2027, Prague",
+				"items": [
+					"Your booth in the Experience Zone, your tickets, your seats at the speakers’ dinner",
+					"Named from the stage at the opening",
+					"Your workshop, mentor slot or roundtable",
+					"You host the speakers’ dinner and the afterparty carries your name (Luminary)",
+					"Introductions made by name, by us (Luminary)"
+				]
+			},
+			"after": {
+				"title": "After the day",
+				"when": "Within 30 days",
+				"items": [
+					"A report: tickets used, booth visits, workshop registrations, newsletter opens and clicks, introductions made (see the sample)",
+					"The opt-in contacts from your workshop or roundtable",
+					"A podcast episode and 3 months of social posts and videos (Luminary)",
+					"A renewal price for the next edition"
+				]
+			}
+		},
+		"hiring_evidence": "Apify: 295 applications to its latest ELC meetup. Ataccama: 106 leaders checked in at its HQ meetup.",
+		"attendees_2026_note": "Marian, 2026-10-08. Role split below is on a base of 350 attendees with a role on record."
+	},
+	"packages": [
 		{
 			"id": "luminary",
 			"name": "Luminary",
 			"price": 20000,
 			"seats": 3,
-			"tagline": "For visibility among engineering leaders.",
+			"budget": "marketing and hiring",
+			"tagline": "The partner of the day: on stage, at the dinner, at the party.",
 			"best_for": [
-				"brand visibility"
+				"brand visibility",
+				"meeting buyers",
+				"hiring"
 			],
 			"includes": [
 				"10 tickets",
+				"Named from the stage at the opening",
+				"You host the speakers’ dinner: your welcome word, 2 seats, your name on the invitation",
+				"The afterparty in your name: your welcome word, your name in the programme and on site",
+				"A workshop or mentor slot for your leader; your speaker can apply for the main stage (same selection as everyone else)",
+				"5 introductions by name, booked by us at the speakers’ dinner, the mentoring zone and the roundtable",
 				"Booth in the Experience Zone",
-				"Dedicated newsletter to 2,900+ subscribers",
-				"2 seats at the speakers' dinner",
+				"Dedicated newsletter to 2,900+ subscribers; your open roles on ELC Jobs for 3 months",
+				"Logo in all media coverage, on the main screen, on site and in every attendee email; a podcast episode and 3 months of social posts and videos",
+				"A report within 30 days: tickets used, booth visits, workshop registrations, newsletter opens and clicks, introductions made",
 				"Listed on the website and partner boards"
-			]
+			],
+			"measurable": "Introductions made, newsletter opens and clicks, applications on ELC Jobs, booth visits."
 		},
 		{
 			"id": "navigator",
 			"name": "Navigator",
 			"price": 12000,
 			"seats": 6,
+			"budget": "hiring",
 			"tagline": "For hiring and employer brand.",
 			"best_for": [
 				"hiring",
@@ -199,17 +400,22 @@ const OFFER_2027 = {
 			],
 			"includes": [
 				"5 tickets",
-				"Booth in the Experience Zone",
-				"1 month on the ELC Jobs platform",
-				"1 seat at the speakers' dinner",
+				"Booth in the Experience Zone, your open roles promoted at it",
+				"1 month on the ELC Jobs platform and your roles in one newsletter issue",
+				"1 seat at the speakers’ dinner",
+				"Named from the stage at the opening",
+				"Logo in media coverage, on the main screen, on site and in every attendee email; social posts about your partnership",
+				"A report within 30 days: tickets used, booth visits, applications on ELC Jobs",
 				"Listed on the website and partner boards"
-			]
+			],
+			"measurable": "Applications on ELC Jobs, booth visits."
 		},
 		{
 			"id": "pioneer",
 			"name": "Pioneer",
 			"price": 5000,
 			"seats": null,
+			"budget": "marketing",
 			"tagline": "For startups meeting early adopters.",
 			"best_for": [
 				"startups",
@@ -217,32 +423,28 @@ const OFFER_2027 = {
 			],
 			"includes": [
 				"2 tickets",
-				"Partner spotlight in the newsletter",
+				"Partner spotlight in the newsletter: a short intro of your team and product to 2,900+ subscribers",
+				"Logo in selected media coverage, in social posts and on site; a mention in every attendee email",
+				"A report within 30 days: spotlight opens and clicks, tickets used",
 				"Listed on the website and partner boards"
-			]
+			],
+			"measurable": "Spotlight opens and clicks."
 		}
 	],
 	"addons": [
 		{
-			"id": "speakers-dinner",
-			"name": "Speakers' dinner",
-			"price": 5000,
+			"id": "category-exclusivity",
+			"name": "Category exclusivity",
+			"price": 18000,
 			"limit": 1,
-			"summary": "Host the evening with the speakers and partners.",
+			"requires": "luminary",
+			"summary": "The only partner in your category, and the Main Partner of the day.",
 			"includes": [
-				"Your welcome word at the dinner",
-				"Your name on the invitation and in the programme"
-			]
-		},
-		{
-			"id": "afterparty",
-			"name": "Afterparty",
-			"price": 6000,
-			"limit": 1,
-			"summary": "Your name on the party after the last talk.",
-			"includes": [
-				"Your welcome word at the party",
-				"Your name in the programme and on site"
+				"No other partner from your category on the day",
+				"Named Main Partner of the day at the opening; your logo on every attendee’s lanyard",
+				"10 more tickets (20 in total)",
+				"An ELC meetup for 100+ leaders in your office in February 2027",
+				"4 mentoring sessions with Marian on technical leadership and AI"
 			]
 		},
 		{
@@ -281,7 +483,12 @@ const OFFER_2027 = {
 			"rule": "10% off the whole order (package + add-ons, after the add-on discount) if the contract is signed by 31 December 2026."
 		},
 		"renewal": "2026 partners get a renewal price, agreed on a call. Not computed automatically.",
-		"attendee_lists": "ELC does not share attendee lists. A partner workshop includes the contacts of attendees who register for it and opt in."
+		"attendee_lists": "ELC does not share attendee lists. A partner workshop includes the contacts of attendees who register for it and opt in.",
+		"report": "Every package includes a written report within 30 days of the conference with the numbers listed in the package.",
+		"introductions": "Introductions by name are part of the Luminary package. ELC books the meetings; the other person always agrees first.",
+		"sample_report": "A sample report with illustrative numbers is published at the partner page so a buyer sees the format before signing.",
+		"category_exclusivity": "Category exclusivity is an add-on to the Luminary package only. One partner on the day.",
+		"dinner_and_afterparty": "The speakers’ dinner and the afterparty are not sold separately. Luminary hosts the dinner and names the afterparty; Navigator has a seat at the dinner."
 	},
 	"links": {
 		"partner_page": "https://www.elc-conference.io/partner/",
@@ -310,20 +517,29 @@ const OFFER_2027 = {
 				"title": "#ELC2025 Aftermovie"
 			}
 		],
-		"book_a_call": "https://www.elc.space/meet-marian"
+		"book_a_call": "https://www.elc.space/meet-marian",
+		"report_sample_pdf": "https://www.elc-conference.io/partner/ELC-Conference-2027-Partner-Report-Sample.pdf"
 	},
 	"contacts": [
 		{
 			"name": "Marian Kamenišťák",
 			"role": "Founder, ELC",
-			"email": "marian@engineeringleaders.io"
+			"email": "marian@engineeringleaders.io",
+			"photo": "marian-kamenistak.webp"
 		},
 		{
 			"name": "Mirka Hofmanová",
 			"role": "Conference producer, ELC",
-			"email": "mirka@engineeringleaders.io"
+			"email": "mirka@engineeringleaders.io",
+			"photo": "mirka-hofmanova.webp"
 		}
-	]
+	],
+	"legal": {
+		"entity": "ELC Community s.r.o.",
+		"company_id": "IČO 21848343",
+		"vat": "Prices are in EUR, ex VAT.",
+		"terms": "Contract and invoice from ELC Community s.r.o. Payment and cancellation terms are in the partner contract."
+	}
 };
 
 export default OFFER_2027;

@@ -2,18 +2,53 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ATTENDEE_ATTRIBUTION, CONFERENCE } from "../conference-data.js";
 import { permissiveShape } from "../mcp-tolerant.js";
 
-/** No calendar file until the 2027 date is announced: a guessed date in someone's calendar is
- *  worse than none. When the date is set, add it to CONFERENCE and build the links from it. */
+/** Calendar links are built only from CONFERENCE.dateIso (the announced date, from the canonical
+ *  offer). With no date there is no calendar entry: a guessed date in someone's calendar is worse
+ *  than none. Venue is "to be announced" until the offer carries one. */
 export function calendarText(): string {
+  if (!CONFERENCE.dateIso) {
+    return [
+      `# Add ${CONFERENCE.name} to your calendar`,
+      "",
+      `The date is not announced yet: ${CONFERENCE.when}, ${CONFERENCE.city}. There is no calendar entry to add until it is, and a guessed date would only mislead.`,
+      "",
+      `- Get the date, and the first ticket wave, by email: ${CONFERENCE.notifyUrl}`,
+      "",
+      ATTENDEE_ATTRIBUTION,
+    ].join("\n");
+  }
+  const d = CONFERENCE.dateIso.replace(/-/g, "");
+  const next = new Date(CONFERENCE.dateIso + "T00:00:00Z");
+  next.setUTCDate(next.getUTCDate() + 1);
+  const d2 = next.toISOString().slice(0, 10).replace(/-/g, "");
+  const title = encodeURIComponent(CONFERENCE.name);
+  const details = encodeURIComponent(`${CONFERENCE.name}, Prague. Tickets and programme: https://www.elc-conference.io/`);
+  const location = encodeURIComponent(`${CONFERENCE.city} (venue to be announced)`);
+  const google = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${d}/${d2}&details=${details}&location=${location}`;
   return [
     `# Add ${CONFERENCE.name} to your calendar`,
     "",
-    `The date is not announced yet: ${CONFERENCE.when}, ${CONFERENCE.city}. There is no calendar entry to add until it is, and a guessed date would only mislead.`,
+    `${CONFERENCE.when}, ${CONFERENCE.city}. Venue: ${CONFERENCE.venue}. All-day entry; the programme times follow once the agenda is out (the 2026 edition ran 9:00 to 21:00 including the afterparty).`,
     "",
-    `- Get the date, and the first ticket wave, by email: ${CONFERENCE.notifyUrl}`,
-    `- If you want a placeholder now, add a reminder for April 2027 titled "${CONFERENCE.name}, Prague (date TBA)" and replace it once the date is out.`,
+    `- Google Calendar: ${google}`,
+    "- Other calendars: save this as elc-conference-2027.ics",
     "",
-    "For reference, the 2026 edition ran on 16 April 2026, 9:00 to 21:00 including the afterparty.",
+    "```",
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//ELC Conference//2027//EN",
+    "BEGIN:VEVENT",
+    `UID:elc-conference-${CONFERENCE.dateIso}@elc-conference.io`,
+    `DTSTART;VALUE=DATE:${d}`,
+    `DTEND;VALUE=DATE:${d2}`,
+    `SUMMARY:${CONFERENCE.name}`,
+    `LOCATION:${CONFERENCE.city} (venue to be announced)`,
+    "URL:https://www.elc-conference.io/",
+    "END:VEVENT",
+    "END:VCALENDAR",
+    "```",
+    "",
+    `- Tickets: ${CONFERENCE.ticketStatus2027}`,
     "",
     ATTENDEE_ATTRIBUTION,
   ].join("\n");
@@ -22,7 +57,7 @@ export function calendarText(): string {
 export function registerAddToCalendar(server: McpServer): void {
   server.tool(
     "add-to-calendar",
-    "Add ELC Conference 2027 to the user's calendar. The exact 2027 date is not announced yet, so this explains that and how to get notified, instead of creating an entry with a guessed date.",
+    "Add ELC Conference 2027 (22 April 2027, Prague) to the user's calendar: a Google Calendar link and an .ics entry built from the announced date. Venue to be announced.",
     // `permissiveShape({})` rather than a bare `{}`: an empty shape leaves
     // @posthog/mcp free to inject a REQUIRED `context`, which made the one call shape
     // every agent tries first — this tool with no arguments at all — fail.

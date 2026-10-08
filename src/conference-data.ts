@@ -2,8 +2,8 @@
  * Attendee-side facts about ELC Conference 2027. Every value is sourced; nothing is guessed.
  *
  * Sources (checked 2026-10-01):
- *  - OFFER (src/data/offer-2027.ts, the canonical 2027 offer): event name, "April 2027 (exact date
- *    to be announced)", format, 2026 results, 2027 target, past speakers.
+ *  - OFFER (src/data/offer-2027.ts, the canonical 2027 offer): event name, "22 April 2027" (Marian,
+ *    2026-10-08; venue to be announced), format, 2026 results, 2027 target, past speakers.
  *  - www.elc-conference.io homepage: "April 2027 · Prague, Czechia", "Notify me — ELC 27 tickets"
  *    (→ /subscribe), the ticket cards' inclusions, the FAQ (audience, topics, English, invoices).
  *  - 2026 edition (16 April 2026, SHQ Centrála ČSOB) and 2026 ticket names/prices: SimpleShop
@@ -21,6 +21,8 @@ const P = OFFER.proof;
 export const CONFERENCE = {
   name: OFFER.event.name,
   when: OFFER.event.when,
+  /** ISO date of the 2027 edition once announced (Marian, 2026-10-08: 2027-04-22); empty until then. */
+  dateIso: OFFER.event.date ?? "",
   city: "Prague, Czechia",
   venue: "to be announced",
   website: SITE,
@@ -31,7 +33,7 @@ export const CONFERENCE = {
   tagline: "Own. Lead. Evolve.",
   format: OFFER.event.format,
   language: "English. All talks and official programming are in English.",
-  /** "600+" — the offer says "600+ (target)"; callers label it as a target themselves. */
+  /** "500" — the offer says "500 (target)"; callers label it as a target themselves. */
   attendeesTarget2027: P.attendees_target_2027.replace(/\s*\(target\)\s*$/i, ""),
   audience:
     "Current leaders (CTOs, VPs of Engineering, Engineering Managers, Tech Leads), product and strategy (Product Managers, technical founders) and future leaders (senior engineers preparing to step up).",
